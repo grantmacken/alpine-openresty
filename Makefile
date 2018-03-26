@@ -69,8 +69,8 @@ $(T)/pcre-latest.version:
 
 downloadPcre: $(T)/pcre-latest.version
 	@echo "$(notdir $@) "
-	@echo 'Task: download latest pcre version'
-	@curl -sSL ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/$(shell cat $<).tar.gz | \
+	@echo 'Task: use wget to download latest pcre version'
+	@wget -qO- ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/$(shell cat $<).tar.gz | \
  tar xz --directory $(T)
 	@echo '------------------------------------------------'
 
