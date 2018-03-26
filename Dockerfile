@@ -25,21 +25,28 @@ RUN apk add --no-cache --virtual .build-deps \
   apk del .build-deps
 
 # Second stage,
-FROM alpine:3.7
+FROM alpine:3.7 as slim
 COPY --from=packager /usr/local/openresty /usr/local/openresty
 RUN apk add --no-cache \
-  linux-headers \
-  build-base \
   gd \
-  libgcc \
   geoip \
+  libgcc \
   libxslt \
-  perl \
-  curl \
-  unzip \
   zlib \
   && ln -sf /dev/stdout /usr/local/openresty/nginx/logs/access.log \
   && ln -sf /dev/stderr /usr/local/openresty/nginx/logs/error.log
+
+
+  # linux-headers \
+  # build-base \
+  # gd \
+  # libgcc \
+  # geoip \
+  # libxslt \
+  # perl \
+  # curl \
+  # unzip \
+  # zlib \
 
 ENV OPENRESTY_HOME /usr/local/openresty
 WORKDIR $OPENRESTY_HOME
