@@ -20,13 +20,32 @@ RUN apk add --no-cache --virtual .build-deps \
   gd-dev \
   readline-dev \
   && mkdir tmp \
-  && make && \
+  && make -j$(grep ^proces /proc/cpuinfo | wc -l) && \
   rm -rf tmp && \
   apk del .build-deps
 
-ENV LANG C.UTF-81
-EXPOSE 80 443
-# # #  VOLUME $EXIST_DATA_DIR
-STOPSIGNAL SIGTERM
+# Second stage,
+FROM alpine:3.7
+COPY --from=packager /usr/local/openresty /usr/local/openresty
+RUN apk add --no-cache \
+  linux-headers \
+  build-base \
+  gd \
+  libgcc \
+  geoip \
+  libxslt \
+  perl \
+  curl \
+  unzip \
+  zlib \
+  && ln -sf /dev/stdout /usr/local/openresty/nginx/logs/access.log \
+  && ln -sf /dev/stderr /usr/local/openresty/nginx/logs/error.log
+
+ENV OPENRESTY_HOME /usr/local/openresty
 WORKDIR $OPENRESTY_HOME
+ENV LANG C.UTF-81
+ EXPOSE 80 443
+# # #  VOLUME $EXIST_DATA_DIR
+ STOPSIGNAL SIGTERM
+# WORKDIR $OPENRESTY_HOME
 ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]

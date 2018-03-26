@@ -31,15 +31,16 @@ $(T)/openresty-latest.version:
 	@curl -sSL https://openresty.org/en/download.html |\
  grep -oE 'openresty-([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)' |\
  head -1 > $(T)/openresty-latest.version
-	@cat $@
-	@echo '----------------------------'
+	@if [ -n "$$( cat $@ )" ] ; then echo " - obtained version [ $$( cat $@ ) ] "; else false;fi;
+	@echo '------------------------------------------------'
 
 downloadOpenresty: $(T)/openresty-latest.version
 	@echo "# $(notdir $@) #"
 	@echo 'Task: download latest openresty version'
 	@curl -sSL https://openresty.org/download/$(shell cat $<).tar.gz | \
  tar xz --directory $(T)
-	@echo '----------------------------'
+	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloded [ $(shell cat $<) ] "; else false;fi;
+	@echo '------------------------------------------------'
 
 $(T)/openssl-latest.version:
 	@echo " $(notdir $@) "
@@ -47,7 +48,7 @@ $(T)/openssl-latest.version:
 	@curl -sSL https://github.com/openssl/openssl/releases | \
  grep -oE 'OpenSSL_(\d_\d_[2-9]{1}[a-z]{1})\.tar\.gz' | \
  head -1 | sed -e '$(TAR_SUF)' > $(@)
-	@cat $@
+	@if [ -n "$$( cat $@ )" ] ; then echo " - obtained version [ $$( cat $@ ) ] "; else false;fi;
 	@echo '----------------------------'
 
 #note the prefix 'openssl-'
@@ -64,13 +65,13 @@ $(T)/pcre-latest.version:
 	@curl -sSL ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/ |\
  grep -oE 'pcre-[0-9\.]+\.tar\.gz' |\
  head -1 | sed -e '$(TAR_SUF)' > $(@)
-	@cat $@
+	@if [ -n "$$( cat $@ )" ] ; then echo " - obtained version [ $$( cat $@ ) ] "; else false;fi;
 	@echo '------------------------------------------------'
 
 downloadPcre: $(T)/pcre-latest.version
 	@echo "$(notdir $@) "
-	@echo 'Task: use wget to download latest pcre version'
-	@wget -qO- ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/$(shell cat $<).tar.gz | \
+	@echo 'Task: download latest pcre version'
+	@curl -sSL ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/$(shell cat $<).tar.gz | \
  tar xz --directory $(T)
 	@echo '------------------------------------------------'
 
@@ -80,7 +81,7 @@ $(T)/zlib-latest.version:
 	@ curl -sSL http://zlib.net/ |\
  grep -oE 'zlib-[0-9\.]+\.tar\.gz' |\
  head -1 | sed -e '$(TAR_SUF)' > $(@)
-	@cat $@
+	@if [ -n "$$( cat $@ )" ] ; then echo " - obtained version [ $$( cat $@ ) ] "; else false;fi;
 	@echo '------------------------------------------------'
 
 downloadZlib: $(T)/zlib-latest.version
@@ -90,13 +91,8 @@ downloadZlib: $(T)/zlib-latest.version
  tar xz --directory $(T)
 	@echo '------------------------------------------------'
 
-orInstallDownloads:
-	@echo "$(notdir $@) "
-	@$(MAKE) -j$(shell grep ^proces /proc/cpuinfo | wc -l ) --silent \
- downloadOpenresty downloadOpenssl downloadPcre downloadZlib
-	@echo '================================================'
 
-orInstall: orInstallDownloads
+orInstall: downloadOpenresty downloadOpenssl downloadZlib downloadPcre
 orInstall:
 	@echo "$(notdir $@) "
 	@echo "configure and install $(shell cat $(T)/openresty-latest.version) "
