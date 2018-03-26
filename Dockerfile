@@ -21,7 +21,7 @@ RUN apk add --no-cache --virtual .build-deps \
   readline-dev \
   && mkdir tmp \
   && make && \
-  rm -rf tmp &&
+  rm -rf tmp && \
   apk del .build-deps
 
 ENV LANG C.UTF-81
