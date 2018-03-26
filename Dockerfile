@@ -21,10 +21,12 @@ RUN apk add --no-cache --virtual .build-deps \
   readline-dev \
   && mkdir tmp \
   && make && \
-  rm -rf tmp
+  rm -rf tmp &&
+  apk del .build-deps
 
 ENV LANG C.UTF-81
-EXPOSE 8282
+EXPOSE 80 443
 # # #  VOLUME $EXIST_DATA_DIR
 STOPSIGNAL SIGTERM
+WORKDIR $INSTALL_PATH
 ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]
