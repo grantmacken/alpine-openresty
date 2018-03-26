@@ -71,7 +71,7 @@ $(T)/pcre-latest.version:
 downloadPcre: $(T)/pcre-latest.version
 	@echo "$(notdir $@) "
 	@echo 'Task: download latest pcre version'
-	@curl -sSL https:ftp.pcre.org/pub/pcre/$(shell cat $<).tar.gz | \
+	@curl -sSL https://ftp.pcre.org/pub/pcre/$(shell cat $<).tar.gz | \
  tar xz --directory $(T)
 	@echo '------------------------------------------------'
 
