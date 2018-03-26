@@ -85,15 +85,16 @@ $(T)/zlib-latest.version:
 
 downloadZlib: $(T)/zlib-latest.version
 	@echo "$(notdir $@) "
+	@echo 'Task: download the latest zlib version'
 	@curl -sSL http://zlib.net/$(shell cat $<).tar.gz | \
  tar xz --directory $(T)
+	@echo '------------------------------------------------'
 
 orInstallDownloads:
 	@echo "$(notdir $@) "
-	@$(MAKE) --silent downloadOpenresty
-	@$(MAKE) --silent downloadOpenssl
-	@$(MAKE) --silent downloadPcre
-	@$(MAKE) --silent downloadZlib
+	@$(MAKE) -j$(shell grep ^proces /proc/cpuinfo | wc -l ) --silent \
+ downloadOpenresty downloadOpenssl downloadPcre downloadZlib
+	@echo '================================================'
 
 orInstall: orInstallDownloads
 orInstall:
