@@ -113,8 +113,7 @@ orInstall:
  --without-http_empty_gif_module \
  --without-http_fastcgi_module \
  --without-http_uwsgi_module \
- --without-http_scgi_module
+ --without-http_scgi_module  > $(T)/configure.log 2>&1
 	@cd $(T)/$(shell cat $(T)/openresty-latest.version);\
- make -j$(shell grep ^proces /proc/cpuinfo | wc -l ) && make install
-
-
+ make -j$(shell grep ^proces /proc/cpuinfo | wc -l ) > $(T)/make.log 2>&1
+	@cd $(T)/$(shell cat $(T)/openresty-latest.version); make install
