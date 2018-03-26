@@ -39,7 +39,7 @@ downloadOpenresty: $(T)/openresty-latest.version
 	@echo 'Task: download latest openresty version'
 	@curl -sSL https://openresty.org/download/$(shell cat $<).tar.gz | \
  tar xz --directory $(T)
-	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloded [ $(shell cat $<) ] "; else false;fi;
+	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloaded [ $(shell cat $<) ] "; else false;fi;
 	@echo '------------------------------------------------'
 
 $(T)/openssl-latest.version:
@@ -71,7 +71,7 @@ $(T)/pcre-latest.version:
 downloadPcre: $(T)/pcre-latest.version
 	@echo "$(notdir $@) "
 	@echo 'Task: download latest pcre version'
-	@curl -sSL ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/$(shell cat $<).tar.gz | \
+	@curl -sSL https:ftp.pcre.org/pub/pcre/$(shell cat $<).tar.gz | \
  tar xz --directory $(T)
 	@echo '------------------------------------------------'
 
