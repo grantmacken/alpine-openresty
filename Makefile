@@ -38,7 +38,7 @@ downloadOpenresty: $(T)/openresty-latest.version
 	@echo "# $(notdir $@) #"
 	@echo 'Task: download latest openresty version'
 	@curl -sSL https://openresty.org/download/$(shell cat $<).tar.gz | \
- tar xvz --directory $(T)
+ tar xz --directory $(T)
 	@echo '----------------------------'
 
 $(T)/openssl-latest.version:
@@ -56,7 +56,7 @@ downloadOpenssl: $(T)/openssl-latest.version
 	@echo "# $(notdir $@) #"
 	@echo 'Task: download latest openssl version'
 	@curl -sSL https://github.com/openssl/openssl/archive/$(shell cat $<).tar.gz | \
- tar xvz --directory $(T)
+ tar xz --directory $(T)
 
 $(T)/pcre-latest.version:
 	@echo "$(notdir $@) "
@@ -71,7 +71,7 @@ downloadPcre: $(T)/pcre-latest.version
 	@echo "$(notdir $@) "
 	@echo 'Task: download latest pcre version'
 	@curl -sSL ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/$(shell cat $<).tar.gz | \
- tar xvz --directory $(T)
+ tar xz --directory $(T)
 	@echo '------------------------------------------------'
 
 $(T)/zlib-latest.version:
@@ -86,7 +86,7 @@ $(T)/zlib-latest.version:
 downloadZlib: $(T)/zlib-latest.version
 	@echo "$(notdir $@) "
 	@curl -sSL http://zlib.net/$(shell cat $<).tar.gz | \
- tar xvz --directory $(T)
+ tar xz --directory $(T)
 
 orInstallDownloads:
 	@echo "$(notdir $@) "
@@ -113,7 +113,7 @@ orInstall:
  --without-http_empty_gif_module \
  --without-http_fastcgi_module \
  --without-http_uwsgi_module \
- --without-http_scgi_module  > $(T)/configure.log 2>&1
+ --without-http_scgi_module  > configure.log 2>&1
 	@cd $(T)/$(shell cat $(T)/openresty-latest.version);\
- make -j$(shell grep ^proces /proc/cpuinfo | wc -l ) > $(T)/make.log 2>&1
+ make -j$(shell grep ^proces /proc/cpuinfo | wc -l ) > make.log 2>&1
 	@cd $(T)/$(shell cat $(T)/openresty-latest.version); make install
