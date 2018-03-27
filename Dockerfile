@@ -15,8 +15,7 @@ COPY Makefile Makefile
 # First Stage:
 # this installs openresty from sources into /usr/local/openresty
 # the install build dependencies are the remove
-# --virtual .build-deps
-RUN apk add --no-cache  \
+RUN apk add --no-cache --virtual .build-deps \
   build-base \
   linux-headers \
   wget \
@@ -37,12 +36,12 @@ ENV OPENRESTY_HOME /usr/local/openresty
 ENV OPENRESTY_BIN /usr/local/openresty/bin
 COPY --from=packager /usr/local/openresty /usr/local/openresty
 RUN apk add --no-cache \
-  gd \
-  geoip \
-  libgcc \
-  libxslt \
-  && ln -s $OPENRESTY_BIN/openresty /usr/local/bin \
-  && ln -s $OPENRESTY_BIN/resty /usr/local/bin
+    gd \
+    geoip \
+    libgcc \
+    libxslt \
+    && ln -s $OPENRESTY_BIN/openresty /usr/local/bin \
+    && ln -s $OPENRESTY_BIN/resty /usr/local/bin
 
 # not sure about keeping 
 # libxslt \
