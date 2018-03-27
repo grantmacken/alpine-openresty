@@ -48,20 +48,8 @@ RUN apk add --no-cache \
 # libxslt \
 # geoip \
 
-# alpine fat
-# linux-headers \
-# build-base \
-# gd \
-# libgcc \-
-# geoip \
-# libxslt \
-# perl \
-# curl \
-# unzip \
-# zlib \
-WORKDIR $OPENRESTY_HOME
 ENV LANG C.UTF-81
-# EXPOSE 80 443
+EXPOSE 80 443
 # # # #  VOLUME $EXIST_DATA_DIR
 STOPSIGNAL SIGTERM
 WORKDIR $OPENRESTY_HOME
