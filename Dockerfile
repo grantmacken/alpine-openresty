@@ -11,6 +11,9 @@ WORKDIR $INSTALL_PATH
 COPY Makefile Makefile
 # build-base like build-essentials 
 # contains make
+# First Stage:
+# this installs openresty from sources into /usr/local/openresty
+# the install build dependencies are the remove
 
 RUN apk add --no-cache --virtual .build-deps \
   build-base \
@@ -24,7 +27,9 @@ RUN apk add --no-cache --virtual .build-deps \
   rm -rf tmp && \
   apk del .build-deps
 
-# Second stage,
+# Second Stage:
+# Copy over openresty directory
+# Then install only the or run dependencies 
 FROM alpine:3.7 as slim
 COPY --from=packager /usr/local/openresty /usr/local/openresty
 RUN apk add --no-cache \
@@ -32,27 +37,28 @@ RUN apk add --no-cache \
   geoip \
   libgcc \
   libxslt \
-  zlib \
-  && ln -sf /dev/stdout /usr/local/openresty/nginx/logs/access.log \
-  && ln -sf /dev/stderr /usr/local/openresty/nginx/logs/error.log
 
+# not sure about keeping 
+# libxslt \
+# geoip \
 
-  # linux-headers \
-  # build-base \
-  # gd \
-  # libgcc \
-  # geoip \
-  # libxslt \
-  # perl \
-  # curl \
-  # unzip \
-  # zlib \
+# alpine fat
+# linux-headers \
+# build-base \
+# gd \
+# libgcc \-
+# geoip \
+# libxslt \
+# perl \
+# curl \
+# unzip \
+# zlib \
 
 ENV OPENRESTY_HOME /usr/local/openresty
 WORKDIR $OPENRESTY_HOME
 ENV LANG C.UTF-81
- EXPOSE 80 443
+EXPOSE 80 443
 # # #  VOLUME $EXIST_DATA_DIR
- STOPSIGNAL SIGTERM
+STOPSIGNAL SIGTERM
 # WORKDIR $OPENRESTY_HOME
 ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]

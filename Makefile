@@ -24,13 +24,12 @@ build: VERSION
 push:
 	@docker push $(DOCKER_IMAGE):latest
 
-
 $(T)/openresty-latest.version:
 	@echo "# $(notdir $@) #"
 	@echo 'Task: fetch the latest openresty version'
 	@curl -sSL https://openresty.org/en/download.html |\
  grep -oE 'openresty-([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)' |\
- head -1 > $(T)/openresty-latest.version
+ head -1 > $(@)
 	@if [ -n "$$( cat $@ )" ] ; then echo " - obtained version [ $$( cat $@ ) ] "; else false;fi;
 	@echo '------------------------------------------------'
 
@@ -58,13 +57,17 @@ downloadOpenssl: $(T)/openssl-latest.version
 	@echo 'Task: download latest openssl version'
 	@curl -sSL https://github.com/openssl/openssl/archive/$(shell cat $<).tar.gz | \
  tar xz --directory $(T)
+	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloaded [ $(shell cat $<) ] "; else false;fi;
+
+# note: travis having difficulty with ftp try http
+# note: for pcre source use tail
 
 $(T)/pcre-latest.version:
 	@echo "$(notdir $@) "
 	@echo 'Task: fetch the latest pcre version'
-	@curl -sSL ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/ |\
+	@curl -sSL https://ftp.pcre.org/pub/pcre/ |\
  grep -oE 'pcre-[0-9\.]+\.tar\.gz' |\
- head -1 | sed -e '$(TAR_SUF)' > $(@)
+ tail -1 | sed -e '$(TAR_SUF)' > $(@)
 	@if [ -n "$$( cat $@ )" ] ; then echo " - obtained version [ $$( cat $@ ) ] "; else false;fi;
 	@echo '------------------------------------------------'
 
@@ -73,6 +76,7 @@ downloadPcre: $(T)/pcre-latest.version
 	@echo 'Task: download latest pcre version'
 	@curl -sSL https://ftp.pcre.org/pub/pcre/$(shell cat $<).tar.gz | \
  tar xz --directory $(T)
+	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloaded [ $(shell cat $<) ] "; else false;fi;
 	@echo '------------------------------------------------'
 
 $(T)/zlib-latest.version:
@@ -89,8 +93,8 @@ downloadZlib: $(T)/zlib-latest.version
 	@echo 'Task: download the latest zlib version'
 	@curl -sSL http://zlib.net/$(shell cat $<).tar.gz | \
  tar xz --directory $(T)
+	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloaded [ $(shell cat $<) ] "; else false;fi;
 	@echo '------------------------------------------------'
-
 
 orInstall: downloadOpenresty downloadOpenssl downloadZlib downloadPcre
 orInstall:
