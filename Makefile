@@ -44,9 +44,9 @@ downloadOpenresty: $(T)/openresty-latest.version
 $(T)/openssl-latest.version:
 	@echo " $(notdir $@) "
 	@echo 'TASK:  fetch the latest openssl version'
-	@curl -sSL https://github.com/openssl/openssl/releases | \
- grep -oE 'OpenSSL_(\d_\d_[2-9]{1}[a-z]{1})\.tar\.gz' | \
- head -1 | sed -e '$(TAR_SUF)' | sed -e 's%OpenSSL_%openssl-%'  > $(@)
+	@curl -sSL https://www.openssl.org/source/ | \
+ grep -oE 'openssl-(\d\.\d\.[2-9]{1}[a-z]{1})\.tar\.gz' | \
+ head -1 | sed -e '$(TAR_SUF)'  > $(@)
 	@if [ -n "$$( cat $@ )" ] ; then echo " - obtained version [ $$( cat $@ ) ] "; else false;fi;
 	@echo '----------------------------'
 
@@ -54,15 +54,17 @@ $(T)/openssl-latest.version:
 
 downloadOpenssl: $(T)/openssl-latest.version
 	@echo "# $(notdir $@) #"
-	@echo 'Task: download latest openssl version'
+	@echo 'Task: download: [ https://www.openssl.org/source/$(shell cat $<).tar.gz ] '
 	@curl -sSL https://www.openssl.org/source/$(shell cat $<).tar.gz | \
  tar xz --directory $(T)
 	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloaded [ $(shell cat $<) ] "; else false;fi;
+	@echo '------------------------------------------------'
+
 # note: travis having difficulty with ftp try http
 # note: for pcre source use tail
 
 $(T)/pcre-latest.version:
-	@echo "$(notdir $@) "
+	@echo "# $(notdir $@) #"
 	@echo 'Task: fetch the latest pcre version'
 	@curl -sSL https://ftp.pcre.org/pub/pcre/ |\
  grep -oE 'pcre-[0-9\.]+\.tar\.gz' |\
@@ -98,7 +100,12 @@ downloadZlib: $(T)/zlib-latest.version
 orInstall: downloadOpenresty downloadOpenssl downloadZlib downloadPcre
 orInstall:
 	@echo "$(notdir $@) "
-	@echo "configure and install $(shell cat $(T)/openresty-latest.version) "
+	@echo " - sanity checks "
+	@[ -d $(T)/$(shell cat $(T)/openresty-latest.version) ]
+	@[ -d $(T)/$(shell cat $(T)/zlib-latest.version) ]
+	@[ -d $(T)/$(shell cat $(T)/pcre-latest.version) ]
+	@[ -d $(T)/$(shell cat $(T)/openssl-latest.version) ]
+	@echo " - configure and install "
 	@cd $(T)/$(shell cat $(T)/openresty-latest.version);\
  ./configure \
  --user=$(INSTALLER) \
@@ -106,14 +113,17 @@ orInstall:
  --with-pcre="../$(shell cat $(T)/pcre-latest.version)" \
  --with-pcre-jit \
  --with-zlib="../$(shell cat $(T)/zlib-latest.version)" \
- --with-openssl="../openssl-$(shell cat $(T)/openssl-latest.version)" \
+ --with-openssl="../$(shell cat $(T)/openssl-latest.version)" \
  --with-file-aio \
  --with-http_v2_module \
  --with-http_ssl_module \
  --without-http_empty_gif_module \
+ --without-http_memcached_module \
+ --without-http_auth_basic_module && \
  --without-http_fastcgi_module \
  --without-http_uwsgi_module \
- --without-http_scgi_module  > configure.log 2>&1
+ --without-http_ssi_module \
+ --without-http_scgi_module > conf.log 2>&1
 	@cd $(T)/$(shell cat $(T)/openresty-latest.version);\
  make -j$(shell grep ^proces /proc/cpuinfo | wc -l ) > make.log 2>&1
-	@cd $(T)/$(shell cat $(T)/openresty-latest.version); make install
+
