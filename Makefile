@@ -46,7 +46,7 @@ $(T)/openssl-latest.version:
 	@echo 'TASK:  fetch the latest openssl version'
 	@curl -sSL https://github.com/openssl/openssl/releases | \
  grep -oE 'OpenSSL_(\d_\d_[2-9]{1}[a-z]{1})\.tar\.gz' | \
- head -1 | sed -e '$(TAR_SUF)' > $(@)
+ head -1 | sed -e '$(TAR_SUF)' | sed -e 's%OpenSSL_%openssl-%'  > $(@)
 	@if [ -n "$$( cat $@ )" ] ; then echo " - obtained version [ $$( cat $@ ) ] "; else false;fi;
 	@echo '----------------------------'
 
@@ -55,10 +55,9 @@ $(T)/openssl-latest.version:
 downloadOpenssl: $(T)/openssl-latest.version
 	@echo "# $(notdir $@) #"
 	@echo 'Task: download latest openssl version'
-	@curl -sSL https://github.com/openssl/openssl/archive/$(shell cat $<).tar.gz | \
+	@curl -sSL https://www.openssl.org/source/$(shell cat $<).tar.gz | \
  tar xz --directory $(T)
 	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloaded [ $(shell cat $<) ] "; else false;fi;
-
 # note: travis having difficulty with ftp try http
 # note: for pcre source use tail
 
