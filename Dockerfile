@@ -41,7 +41,7 @@ RUN apk add --no-cache \
   geoip \
   libgcc \
   libxslt \
-  && ln -s $OPENRESTY_BIN/openresty /usr/local/bin
+  && ln -s $OPENRESTY_BIN/openresty /usr/local/bin \
   && ln -s $OPENRESTY_BIN/resty /usr/local/bin
 
 # not sure about keeping 
