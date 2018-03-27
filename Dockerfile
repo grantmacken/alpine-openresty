@@ -15,8 +15,8 @@ COPY Makefile Makefile
 # First Stage:
 # this installs openresty from sources into /usr/local/openresty
 # the install build dependencies are the remove
-
-RUN apk add --no-cache --virtual .build-deps \
+# --virtual .build-deps
+RUN apk add --no-cache  \
   build-base \
   linux-headers \
   wget \
@@ -59,9 +59,7 @@ RUN apk add --no-cache \
 # curl \
 # unzip \
 # zlib \
-
-# ENV OPENRESTY_HOME /usr/local/openresty
-# WORKDIR $OPENRESTY_HOME
+WORKDIR $OPENRESTY_HOME
 ENV LANG C.UTF-81
 # EXPOSE 80 443
 # # # #  VOLUME $EXIST_DATA_DIR

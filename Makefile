@@ -7,12 +7,13 @@ T := tmp
 SUDO_USER := $(shell echo "$${SUDO_USER}")
 WHOAMI    := $(shell whoami)
 INSTALLER := $(if $(SUDO_USER),$(SUDO_USER),$(WHOAMI))
+OR_LATEST := $(T)/openresty-latest.version
+
 .SECONDARY:
 
 # TARGETS
 
-default: orInstall
-
+default: $(T)/install.log
 
 build: VERSION
 	@echo "## $@ ##"
@@ -24,7 +25,7 @@ build: VERSION
 push:
 	@docker push $(DOCKER_IMAGE):latest
 
-$(T)/openresty-latest.version:
+$(OR_LATEST):
 	@echo "# $(notdir $@) #"
 	@echo 'Task: fetch the latest openresty version'
 	@curl -sSL https://openresty.org/en/download.html |\
@@ -33,7 +34,7 @@ $(T)/openresty-latest.version:
 	@if [ -n "$$( cat $@ )" ] ; then echo " - obtained version [ $$( cat $@ ) ] "; else false;fi;
 	@echo '------------------------------------------------'
 
-downloadOpenresty: $(T)/openresty-latest.version
+downloadOpenresty: $(OR_LATEST)
 	@echo "# $(notdir $@) #"
 	@echo 'Task: download latest openresty version'
 	@curl -sSL https://openresty.org/download/$(shell cat $<).tar.gz | \
@@ -97,16 +98,15 @@ downloadZlib: $(T)/zlib-latest.version
 	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloaded [ $(shell cat $<) ] "; else false;fi;
 	@echo '------------------------------------------------'
 
-orInstall: downloadOpenresty downloadOpenssl downloadZlib downloadPcre
-orInstall:
+$(T)/configure.log: downloadOpenresty downloadOpenssl downloadZlib downloadPcre
 	@echo "$(notdir $@) "
 	@echo " - sanity checks "
-	@[ -d $(T)/$(shell cat $(T)/openresty-latest.version) ]
+	@[ -d $(T)/$(shell cat $(OR_LATEST)) ]
 	@[ -d $(T)/$(shell cat $(T)/zlib-latest.version) ]
 	@[ -d $(T)/$(shell cat $(T)/pcre-latest.version) ]
 	@[ -d $(T)/$(shell cat $(T)/openssl-latest.version) ]
 	@echo " - configure and install "
-	@cd $(T)/$(shell cat $(T)/openresty-latest.version);\
+	@cd $(T)/$(shell cat $(OR_LATEST));\
  ./configure \
  --user=$(INSTALLER) \
  --group=$(INSTALLER) \
@@ -119,11 +119,20 @@ orInstall:
  --with-http_ssl_module \
  --without-http_empty_gif_module \
  --without-http_memcached_module \
- --without-http_auth_basic_module && \
+ --without-http_auth_basic_module \
  --without-http_fastcgi_module \
  --without-http_uwsgi_module \
  --without-http_ssi_module \
- --without-http_scgi_module > conf.log 2>&1
-	@cd $(T)/$(shell cat $(T)/openresty-latest.version);\
- make -j$(shell grep ^proces /proc/cpuinfo | wc -l ) > make.log 2>&1
+ --without-http_scgi_module >> configure.log 2>&1
+	@echo '------------------------------------------------'
 
+$(T)/make.log: $(T)/configure.log
+	@echo "$(notdir $@) " &> $(@)
+	@cd $(T)/$(shell cat $(OR_LATEST));\
+ make -j$(shell grep ^proces /proc/cpuinfo | wc -l ) >> make.log 2>&1
+	@echo '------------------------------------------------'
+
+$(T)/install.log: $(T)/make.log
+	@echo "$(notdir $@) " &> $(@)
+	@cd $(T)/$(shell cat $(OR_LATEST)); make install | tee -a install.log
+	@echo '------------------------------------------------'
