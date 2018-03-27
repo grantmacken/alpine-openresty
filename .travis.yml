@@ -1,3 +1,5 @@
+# Travis yaml grantmacken/alpine-openresty
+# https://github.com/grantmacken/alpine-openresty
 sudo: required
 dist: trusty
 os: linux
@@ -12,7 +14,6 @@ before_script:
 script:
   - docker build --pull --cache-from "$IMAGE" --tag "$IMAGE" .
   - docker run -d $IMAGE
-
 after_script:
   - docker images
   - docker ps
