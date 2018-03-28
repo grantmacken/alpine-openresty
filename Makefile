@@ -108,8 +108,11 @@ $(T)/configure.log: downloadOpenresty downloadOpenssl downloadZlib downloadPcre
 	@echo " - configure and install "
 	@cd $(T)/$(shell cat $(OR_LATEST));\
  ./configure \
- --user=$(INSTALLER) \
- --group=$(INSTALLER) \
+ --prefix=/usr/local/openresty/nginx \
+ --error-log-path=/usr/local/openresty/nginx/logs/error.log \
+ --http-log-path=/usr/local/openresty/nginx/logs/access.log \
+ --pid-path=/usr/local/openresty/nginx/logs/nginx.pid \
+ --lock-path=/usr/local/openresty/nginx/logs/nginx.lock \
  --with-pcre="../$(shell cat $(T)/pcre-latest.version)" \
  --with-pcre-jit \
  --with-zlib="../$(shell cat $(T)/zlib-latest.version)" \
@@ -136,3 +139,5 @@ $(T)/install.log: $(T)/make.log
 	@echo "$(notdir $@) " &> $(@)
 	@cd $(T)/$(shell cat $(OR_LATEST)); make install | tee -a install.log
 	@echo '------------------------------------------------'
+
+
