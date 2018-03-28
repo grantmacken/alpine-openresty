@@ -108,7 +108,6 @@ $(T)/configure.log: downloadOpenresty downloadOpenssl downloadZlib downloadPcre
 	@echo " - configure and install "
 	@cd $(T)/$(shell cat $(OR_LATEST));\
  ./configure \
- --prefix=/usr/local/openresty/nginx \
  --error-log-path=/usr/local/openresty/nginx/logs/error.log \
  --http-log-path=/usr/local/openresty/nginx/logs/access.log \
  --pid-path=/usr/local/openresty/nginx/logs/nginx.pid \
