@@ -17,3 +17,4 @@ script:
 after_script:
   - docker images
   - docker ps
+  - docker run --entrypoint "" $IMAGE ls ./bin/openresty -V
