@@ -41,8 +41,9 @@ RUN apk add --no-cache \
     libgcc \
     libxslt \
     && ln -s $OPENRESTY_BIN/openresty /usr/local/bin \
-    && ln -s $OPENRESTY_BIN/resty /usr/local/bin
-
+    && ln -s $OPENRESTY_BIN/resty /usr/local/bin \
+    && ln -sf /dev/stdout $OPENRESTY_HOME/nginx/logs/access.log \
+    && ln -sf /dev/stderr $OPENRESTY_HOME/nginx/logs/error.log
 # not sure about keeping 
 # libxslt \
 # geoip \
