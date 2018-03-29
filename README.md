@@ -29,9 +29,9 @@ the latest versions for
 - pcre, 
 - zlib, 
 - openssl 
-are obtained then source tar.gz files are downloaded. 
-Openresty is then configured and built these sources
 
+are obtained then source tar.gz files are downloaded. 
+Openresty is then configured and made from these sources.
 
 In this repo the docker-compose.yml published port is 8282
 
