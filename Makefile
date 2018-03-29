@@ -15,7 +15,7 @@ OR_LATEST := $(T)/openresty-latest.version
 
 default: $(T)/install.log
 
-build: VERSION
+build:
 	@echo "## $@ ##"
 	@echo 'TASK: build the docker image'
 	@docker build \
@@ -36,7 +36,7 @@ $(OR_LATEST):
 
 downloadOpenresty: $(OR_LATEST)
 	@echo "# $(notdir $@) #"
-	@echo 'Task: download latest openresty version'
+	@echo 'Task: download  [ https://openresty.org/download/$(shell cat $<).tar.gz ]'
 	@curl -sSL https://openresty.org/download/$(shell cat $<).tar.gz | \
  tar xz --directory $(T)
 	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloaded [ $(shell cat $<) ] "; else false;fi;
@@ -61,6 +61,22 @@ downloadOpenssl: $(T)/openssl-latest.version
 	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloaded [ $(shell cat $<) ] "; else false;fi;
 	@echo '------------------------------------------------'
 
+$(T)/zlib-latest.version:
+	@echo "# $(notdir $@) #"
+	@echo 'Task: fetch the latest zlib version'
+	@curl -sSL http://zlib.net/ |\
+ grep -oE 'zlib-[0-9\.]+\.tar\.gz' |\
+ head -1 | sed -e '$(TAR_SUF)' > $(@)
+	@if [ -n "$$( cat $@ )" ] ; then echo " - obtained version [ $$( cat $@ ) ] "; else false;fi;
+	@echo '------------------------------------------------'
+
+downloadZlib: $(T)/zlib-latest.version
+	@echo "# $(notdir $@) #"
+	@echo 'Task:  download [ http://zlib.net/$(shell cat $<).tar.gz ] '
+	@curl -sSL http://zlib.net/$(shell cat $<).tar.gz | tar xz --directory $(T)
+	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloaded [ $(shell cat $<) ] "; else false;fi;
+	@echo '------------------------------------------------'
+
 # note: travis having difficulty with ftp try http
 # note: for pcre source use tail
 
@@ -74,30 +90,12 @@ $(T)/pcre-latest.version:
 	@echo '------------------------------------------------'
 
 downloadPcre: $(T)/pcre-latest.version
-	@echo "$(notdir $@) "
-	@echo 'Task: download latest pcre version'
-	@curl -sSL https://ftp.pcre.org/pub/pcre/$(shell cat $<).tar.gz | \
+	@echo "# $(notdir $@) #"
+	@echo 'Task: download [ https://ftp.pcre.org/pub/pcre/$(shell cat $<).tar.gz ] '
+	@curl -f -sSL https://ftp.pcre.org/pub/pcre/$(shell cat $<).tar.gz | \
  tar xz --directory $(T)
 	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloaded [ $(shell cat $<) ] "; else false;fi;
 	@echo '------------------------------------------------'
-
-$(T)/zlib-latest.version:
-	@echo "$(notdir $@) "
-	@echo 'Task: fetch the latest zlib version'
-	@ curl -sSL http://zlib.net/ |\
- grep -oE 'zlib-[0-9\.]+\.tar\.gz' |\
- head -1 | sed -e '$(TAR_SUF)' > $(@)
-	@if [ -n "$$( cat $@ )" ] ; then echo " - obtained version [ $$( cat $@ ) ] "; else false;fi;
-	@echo '------------------------------------------------'
-
-downloadZlib: $(T)/zlib-latest.version
-	@echo "$(notdir $@) "
-	@echo 'Task: download the latest zlib version'
-	@curl -sSL http://zlib.net/$(shell cat $<).tar.gz | \
- tar xz --directory $(T)
-	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloaded [ $(shell cat $<) ] "; else false;fi;
-	@echo '------------------------------------------------'
-
 $(T)/configure.log: downloadOpenresty downloadOpenssl downloadZlib downloadPcre
 	@echo "$(notdir $@) "
 	@echo " - sanity checks "

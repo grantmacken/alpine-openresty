@@ -1,0 +1,12 @@
+version: '3.4'
+services:
+  openresty:
+    build:
+      context: .
+      cache_from:
+        - alpine:3.7
+    image: grantmacken/alpine-openresty
+    container_name: openresty
+    ports:
+        - 8282:80
+
