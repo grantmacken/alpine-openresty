@@ -4,9 +4,7 @@ GH_SUB := https://github.com/
 GH_SUF := \.git$
 TAR_SUF := s/\(\.tar\.gz\)*$$//
 T := tmp
-SUDO_USER := $(shell echo "$${SUDO_USER}")
-WHOAMI    := $(shell whoami)
-INSTALLER := $(if $(SUDO_USER),$(SUDO_USER),$(WHOAMI))
+
 OR_LATEST := $(T)/openresty-latest.version
 
 .SECONDARY:
@@ -96,6 +94,7 @@ downloadPcre: $(T)/pcre-latest.version
  tar xz --directory $(T)
 	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloaded [ $(shell cat $<) ] "; else false;fi;
 	@echo '------------------------------------------------'
+
 $(T)/configure.log: downloadOpenresty downloadOpenssl downloadZlib downloadPcre
 	@echo "$(notdir $@) "
 	@echo " - sanity checks "
@@ -110,7 +109,6 @@ $(T)/configure.log: downloadOpenresty downloadOpenssl downloadZlib downloadPcre
  --with-pcre-jit \
  --with-zlib="../$(shell cat $(T)/zlib-latest.version)" \
  --with-openssl="../$(shell cat $(T)/openssl-latest.version)" \
- --with-file-aio \
  --with-http_v2_module \
  --with-http_ssl_module \
  --without-http_empty_gif_module \
