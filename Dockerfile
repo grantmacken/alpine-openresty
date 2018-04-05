@@ -42,6 +42,7 @@ RUN apk add --no-cache \
     libgcc \
     libxslt \
     && mkdir -p /run/secrets \
+    && mkdir -p /etc/letsencrypt/live \
     && ln -s $OPENRESTY_BIN/openresty /usr/local/bin \
     && ln -s $OPENRESTY_BIN/resty /usr/local/bin \
     && ln -sf /dev/stdout $OPENRESTY_HOME/nginx/logs/access.log \
@@ -49,11 +50,7 @@ RUN apk add --no-cache \
 # not sure about keeping 
 # libxslt \
 # geoip \
-
-#   && make clean \
-#   && make ngBasic \
-
-ENV LANG C.UTF-81
+ENV LANG C.UTF-8
 EXPOSE 80 443
 # # # #  VOLUME $EXIST_DATA_DIR
 STOPSIGNAL SIGTERM
