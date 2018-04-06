@@ -111,6 +111,8 @@ $(T)/configure.log: downloadOpenresty downloadOpenssl downloadZlib downloadPcre
  --with-openssl="../$(shell cat $(T)/openssl-latest.version)" \
  --with-http_v2_module \
  --with-http_ssl_module \
+ --with-http_gzip_static_module \
+ --with-http_gunzip_module \
  --without-http_empty_gif_module \
  --without-http_memcached_module \
  --without-http_auth_basic_module \
