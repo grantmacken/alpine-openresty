@@ -6,7 +6,29 @@ services:
       cache_from:
         - alpine:3.7
     image: grantmacken/alpine-openresty
-    container_name: openresty
+    container_name: or
     ports:
-        - 8282:80
+        - 80:80
+        - 443:443
+    environment:
+      - OPENRESTY_HOME
+      - EXIST_HOME
+      - EXIST_DATA_DIR
+      - EXIST_AUTH
+      - LETSENCRYPT
+    networks:
+      - www
+    volumes:
+      - type: bind
+        source: ./src/nginx/conf
+        target: ${OPENRESTY_HOME}/nginx/conf
+      - type: bind
+        source: ./src/openresty/site
+        target: ${OPENRESTY_HOME}/site
+      - type: bind
+        source: ${LETSENCRYPT}
+        target: ${LETSENCRYPT}
+networks:
+  www:
+    driver: bridge
 
