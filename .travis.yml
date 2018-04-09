@@ -19,3 +19,4 @@ after_script:
   - docker ps
   - docker run --entrypoint "" $IMAGE ls -al .
   - docker run --entrypoint "" $IMAGE ./bin/openresty -V
+  - docker-compose version
