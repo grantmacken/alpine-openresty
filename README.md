@@ -8,10 +8,6 @@ This is a base openresty slim  docker image
 to be used as the FROM basis for other images
 or for defining services in a docker-compose.yml file
 
-
-
-# To build the image
-
 Clone  or Fork this repo
 
 ```
@@ -33,13 +29,13 @@ the latest versions for
 are obtained then source tar.gz files are downloaded. 
 Openresty is then configured and made from these sources.
 
-In this repo the docker-compose.yml published port is 8282
+In this repo the docker-compose.yml published port is 80 443
 
 ```
 docker-compose config
 docker-compose up -d
-w3m -dump http://localhost:8282
-firefox  http://localhost:8282
+w3m -dump http://localhost:80
+firefox  http://localhost:80
 docker-compose down
 ```
 

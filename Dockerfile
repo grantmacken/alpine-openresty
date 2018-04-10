@@ -1,9 +1,7 @@
 # Dockerfile grantmacken/alpine-openresty
 # https://github.com/grantmacken/alpine-openresty
 FROM alpine:3.7 as packager
-
 LABEL maintainer="Grant Mackenzie <grantmacken@gmail.com>"
-
 ENV OPENRESTY_HOME /usr/local/openresty
 ENV OPENRESTY_BIN /usr/local/openresty/bin
 ENV INSTALL_PATH /grantmacken
@@ -20,13 +18,15 @@ RUN apk add --no-cache --virtual .build-deps \
   linux-headers \
   wget \
   curl \
+  tar \
   perl-dev \
   gd-dev \
   readline-dev \
   && mkdir tmp \
-  && make -j$(grep ^proces /proc/cpuinfo | wc -l) \
+  && make -j$(grep ^proces /proc/cpuinfo | wc -l) install-from-sources \
   && rm -rf tmp \
   && apk del .build-deps
+
 
 # Second Stage:
 # Copy over openresty directory
@@ -41,7 +41,6 @@ RUN apk add --no-cache \
     geoip \
     libgcc \
     libxslt \
-    && mkdir -p /run/secrets \
     && mkdir -p /etc/letsencrypt/live \
     && ln -s $OPENRESTY_BIN/openresty /usr/local/bin \
     && ln -s $OPENRESTY_BIN/resty /usr/local/bin \

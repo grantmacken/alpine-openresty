@@ -1,17 +1,33 @@
 DOCKER_IMAGE := grantmacken/alpine-openresty
-GH_PRE := ^git@github\.com:
-GH_SUB := https://github.com/
-GH_SUF := \.git$
-TAR_SUF := s/\(\.tar\.gz\)*$$//
 T := tmp
+TAR_SUF := s/\(\.tar\.gz\)*$$//
 
 OR_LATEST := $(T)/openresty-latest.version
+
+define hOR
+# openresty docker install
+
+Multi stage docker build
+ 1: download source
+ 2: install from sources
+ 3: from base alpine copy over openresty
+
+make targets
+
+endef
 
 .SECONDARY:
 
 # TARGETS
 
-default: $(T)/install.log
+orHelp: export HOR := $(hOR)
+orHelp:
+	@echo "$${HOR}"
+
+default: orHelp
+
+install-from-sources: $(T)/install.log
+
 
 build:
 	@echo "## $@ ##"
