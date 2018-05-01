@@ -16,18 +16,21 @@ COPY Makefile Makefile
 RUN apk add --no-cache --virtual .build-deps \
   build-base \
   linux-headers \
+  grep \
   wget \
   curl \
   tar \
   perl-dev \
   gd-dev \
   readline-dev \
+  &&  wget -O - https://cpanmin.us | perl - App::cpanminus \
+  &&  cpanm --skip-installed -n Test::Base IPC::Run Test::Nginx\
   && mkdir tmp \
   && make -j$(grep ^proces /proc/cpuinfo | wc -l) install-from-sources \
   && rm -rf tmp \
   && apk del .build-deps
 
-
+# /usr/local/lib/perl5/site_perl/5.26.2
 # Second Stage:
 # Copy over openresty directory
 # Then install only the run dependencies 
@@ -41,11 +44,14 @@ RUN apk add --no-cache \
     geoip \
     libgcc \
     libxslt \
+    perl \
     && mkdir -p /etc/letsencrypt/live \
     && ln -s $OPENRESTY_BIN/openresty /usr/local/bin \
     && ln -s $OPENRESTY_BIN/resty /usr/local/bin \
     && ln -sf /dev/stdout $OPENRESTY_HOME/nginx/logs/access.log \
     && ln -sf /dev/stderr $OPENRESTY_HOME/nginx/logs/error.log
+
+COPY --from=packager /usr/local/lib/perl5/site_perl /usr/local/lib/perl5/site_perl
 # not sure about keeping 
 # libxslt \
 # geoip \

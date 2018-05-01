@@ -28,16 +28,32 @@ default: orHelp
 
 install-from-sources: $(T)/install.log
 
-
+build: export RESTY_VERSION := $(shell \
+ curl -sSL https://openresty.org/en/download.html |\
+ grep -oE 'openresty-([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)' |\
+ sed 's/openresty-//' |\
+ head -1)
 build:
 	@echo "## $@ ##"
-	@echo 'TASK: build the docker image'
+	@echo "TASK: build the docker image[ v$$RESTY_VERSION ] "
 	@docker build \
  --tag="$(DOCKER_IMAGE)" \
+ --tag="$(DOCKER_IMAGE):v$$RESTY_VERSION" \
  .
 
+push: export RESTY_VERSION := $(shell \
+ curl -sSL https://openresty.org/en/download.html |\
+ grep -oE 'openresty-([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)' |\
+ sed 's/openresty-//' |\
+ head -1)
 push:
-	@docker push $(DOCKER_IMAGE):latest
+	@echo "## $@ ##"
+	@docker push $(DOCKER_IMAGE):v$$RESTY_VERSION
+
+pull:
+	@echo "## $@ ##"
+	@docker pull $(DOCKER_IMAGE):latest
+
 
 $(OR_LATEST):
 	@echo "# $(notdir $@) #"
@@ -60,9 +76,9 @@ $(T)/openssl-latest.version:
 	@echo " $(notdir $@) "
 	@echo 'TASK:  fetch the latest openssl version'
 	@curl -sSL https://www.openssl.org/source/ | \
- grep -oE 'openssl-(\d\.\d\.[2-9]{1}[a-z]{1})\.tar\.gz' | \
+ grep -oE 'openssl-1.0.2[a-z]{1}\.tar\.gz' | \
  head -1 | sed -e '$(TAR_SUF)'  > $(@)
-	@if [ -n "$$( cat $@ )" ] ; then echo " - obtained version [ $$( cat $@ ) ] "; else false;fi;
+	@if [ -s $@ ] ; then echo " - obtained version [ $$( cat $@ ) ] "; else false;fi;
 	@echo '----------------------------'
 
 #note the prefix 'openssl-'
