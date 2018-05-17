@@ -39,3 +39,30 @@ firefox  http://localhost:80
 docker-compose down
 ```
 
+## Makefile Targets
+
+Images can be built via the Makefile
+
+### production build
+
+```
+make build-prod
+```
+
+This is the production openresty image built from sources.
+It also builds cmark 
+
+### develpment build
+
+```
+make build-dev
+```
+
+This is the development openresty image
+In addition to the stuff in the prod image it contains 
+the tools required to running
+ - OPM the openresty package manager 
+ - Nginx::Test the openresty data driven test framework.
+
+
+

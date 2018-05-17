@@ -30,30 +30,7 @@ RUN apk add --no-cache --virtual .build-deps \
   && rm -rf tmp \
   && apk del .build-deps
 
-# Second Stage: prod
-
-FROM alpine:3.7 as prod
-ENV OPENRESTY_HOME /usr/local/openresty
-ENV OPENRESTY_BIN /usr/local/openresty/bin
-COPY --from=packager /usr/local/openresty /usr/local/openresty
-COPY --from=packager /usr/local/lib/lib* /usr/local/lib/
-WORKDIR $OPENRESTY_HOME
-RUN apk add --no-cache \
-    gd \
-    geoip \
-    libgcc \
-    libxslt \
-    && mkdir -p /etc/letsencrypt/live \
-    && ln -s $OPENRESTY_BIN/openresty /usr/local/bin \
-    && ln -sf /dev/stdout $OPENRESTY_HOME/nginx/logs/access.log \
-    && ln -sf /dev/stderr $OPENRESTY_HOME/nginx/logs/error.log
-
-ENV LANG C.UTF-8
-EXPOSE 80 443
-STOPSIGNAL SIGTERM
-ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]
-
-# Third Stage:  dev
+#  Second Stage:  dev
 
 FROM alpine:3.7 as dev
 ENV OPENRESTY_HOME /usr/local/openresty
@@ -77,15 +54,38 @@ RUN apk add --no-cache \
     && ln -sf /dev/stdout $OPENRESTY_HOME/nginx/logs/access.log \
     && ln -sf /dev/stderr $OPENRESTY_HOME/nginx/logs/error.log
 
+ENV LANG C.UTF-8
+EXPOSE 80 443
+STOPSIGNAL SIGTERM
+ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]
+
+# Third Stage: prod
+FROM alpine:3.7 as prod
+ENV OPENRESTY_HOME /usr/local/openresty
+ENV OPENRESTY_BIN /usr/local/openresty/bin
+COPY --from=packager /usr/local/openresty /usr/local/openresty
+COPY --from=packager /usr/local/lib/lib* /usr/local/lib/
+WORKDIR $OPENRESTY_HOME
+RUN apk add --no-cache \
+    gd \
+    geoip \
+    libgcc \
+    libxslt \
+    && mkdir -p /etc/letsencrypt/live \
+    && ln -s $OPENRESTY_BIN/openresty /usr/local/bin \
+    && ln -sf /dev/stdout $OPENRESTY_HOME/nginx/logs/access.log \
+    && ln -sf /dev/stderr $OPENRESTY_HOME/nginx/logs/error.log
+
+ENV LANG C.UTF-8
+EXPOSE 80 443
+STOPSIGNAL SIGTERM
+ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]
+
+
 # DEV notes:
 # home/t  is for the 'prove' tests dir
 # home/bin  is the for 'resty cli'
-
 # not sure about keeping 
 # libxslt \
 # geoip \
-ENV LANG C.UTF-8
-EXPOSE 80 443
-# # # #  VOLUME $EXIST_DATA_DIR
-STOPSIGNAL SIGTERM
-ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]
+
