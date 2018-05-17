@@ -16,42 +16,71 @@ COPY Makefile Makefile
 RUN apk add --no-cache --virtual .build-deps \
   build-base \
   linux-headers \
+  cmake \
   grep \
   wget \
   curl \
   tar \
   perl-dev \
+  perl-utils \
   gd-dev \
   readline-dev \
-  &&  wget -O - https://cpanmin.us | perl - App::cpanminus \
-  &&  cpanm --skip-installed -n Test::Base IPC::Run Test::Nginx\
   && mkdir tmp \
-  && make -j$(grep ^proces /proc/cpuinfo | wc -l) install-from-sources \
+  && make -j$(grep ^proces /proc/cpuinfo | wc -l) install \
   && rm -rf tmp \
   && apk del .build-deps
 
-# /usr/local/lib/perl5/site_perl/5.26.2
-# Second Stage:
-# Copy over openresty directory
-# Then install only the run dependencies 
-FROM alpine:3.7 as dev
+# Second Stage: prod
+
+FROM alpine:3.7 as prod
 ENV OPENRESTY_HOME /usr/local/openresty
 ENV OPENRESTY_BIN /usr/local/openresty/bin
-COPY --from=packager $OPENRESTY_HOME $OPENRESTY_HOME
+COPY --from=packager /usr/local/openresty /usr/local/openresty
+COPY --from=packager /usr/local/lib/lib* /usr/local/lib/
 WORKDIR $OPENRESTY_HOME
 RUN apk add --no-cache \
     gd \
     geoip \
     libgcc \
     libxslt \
-    perl \
     && mkdir -p /etc/letsencrypt/live \
     && ln -s $OPENRESTY_BIN/openresty /usr/local/bin \
-    && ln -s $OPENRESTY_BIN/resty /usr/local/bin \
     && ln -sf /dev/stdout $OPENRESTY_HOME/nginx/logs/access.log \
     && ln -sf /dev/stderr $OPENRESTY_HOME/nginx/logs/error.log
 
-COPY --from=packager /usr/local/lib/perl5/site_perl /usr/local/lib/perl5/site_perl
+ENV LANG C.UTF-8
+EXPOSE 80 443
+STOPSIGNAL SIGTERM
+ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]
+
+# Third Stage:  dev
+
+FROM alpine:3.7 as dev
+ENV OPENRESTY_HOME /usr/local/openresty
+ENV OPENRESTY_BIN /usr/local/openresty/bin
+WORKDIR $OPENRESTY_HOME
+COPY --from=packager /usr/local /usr/local
+RUN apk add --no-cache \
+    gd \
+    geoip \
+    libgcc \
+    libxslt \
+    perl \
+    curl \
+    && mkdir -p /etc/letsencrypt/live \
+    && mkdir  /home/t \
+    && mkdir  /home/bin \
+    && ln -s $OPENRESTY_BIN/openresty /usr/local/bin \
+    && ln -s $OPENRESTY_BIN/openresty /usr/local/bin/nginx \
+    && ln -s $OPENRESTY_BIN/resty /usr/local/bin \
+    && ln -s /home/t $OPENRESTY_HOME \
+    && ln -sf /dev/stdout $OPENRESTY_HOME/nginx/logs/access.log \
+    && ln -sf /dev/stderr $OPENRESTY_HOME/nginx/logs/error.log
+
+# DEV notes:
+# home/t  is for the 'prove' tests dir
+# home/bin  is the for 'resty cli'
+
 # not sure about keeping 
 # libxslt \
 # geoip \
