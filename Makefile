@@ -18,6 +18,8 @@ endef
 
 .SECONDARY:
 
+.PHONY: perlModules cmark
+
 # TARGETS
 
 orHelp: export HOR := $(hOR)
@@ -26,7 +28,9 @@ orHelp:
 
 default: orHelp
 
-install-from-sources: $(T)/install.log
+install: $(T)/install.log
+	@$(MAKE) perlModules
+	@$(MAKE) cmark
 
 build: export RESTY_VERSION := $(shell \
  curl -sSL https://openresty.org/en/download.html |\
@@ -35,10 +39,23 @@ build: export RESTY_VERSION := $(shell \
  head -1)
 build:
 	@echo "## $@ ##"
-	@echo "TASK: build the docker image[ v$$RESTY_VERSION ] "
+	@echo "TASK: build the docker production image[ v$$RESTY_VERSION ] "
 	@docker build \
+ --target="prod" \
  --tag="$(DOCKER_IMAGE)" \
  --tag="$(DOCKER_IMAGE):v$$RESTY_VERSION" \
+ .
+
+build-dev: export RESTY_VERSION := $(shell \
+ curl -sSL https://openresty.org/en/download.html |\
+ grep -oE 'openresty-([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)' |\
+ sed 's/openresty-//' |\
+ head -1)
+build-dev:
+	@docker build \
+ --target="dev" \
+ --tag="$(DOCKER_IMAGE)-dev" \
+ --tag="$(DOCKER_IMAGE)-dev:v$$RESTY_VERSION" \
  .
 
 push: export RESTY_VERSION := $(shell \
@@ -54,6 +71,17 @@ pull:
 	@echo "## $@ ##"
 	@docker pull $(DOCKER_IMAGE):latest
 
+perlModules:
+	@echo "# $(notdir $@) #"
+	@wget -O - https://cpanmin.us | perl - App::cpanminus \
+  &&  cpanm --skip-installed -n Test::Base IPC::Run Test::Nginx App::Prove
+
+cmark:
+	@echo "# $(notdir $@) #"
+	@echo 'Task: download  [ https://github.com/commonmark/cmark/archive/0.28.3.tar.gz ]'
+	@curl -sSL https://github.com/commonmark/cmark/archive/0.28.3.tar.gz | \
+ tar xz --directory $(T)
+	@cd $(T)/cmark-0.28.3; make && make install
 
 $(OR_LATEST):
 	@echo "# $(notdir $@) #"
