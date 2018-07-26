@@ -8,10 +8,12 @@ This is a base openresty slim  docker image
 to be used as the FROM basis for other images
 or for defining services in a docker-compose.yml file
 
-Clone  or Fork this repo
+Clone or Fork this repo
 
 ```
-make build
+docker build --target=pack .
+docker build --target=dev .
+docker build --target=prod .
 ```
 
 You might want to change some openresty 
@@ -46,7 +48,7 @@ Images can be built via the Makefile
 ### production build
 
 ```
-make build-prod
+make INC=prod build-prod
 ```
 
 This is the production openresty image built from sources.
@@ -55,7 +57,7 @@ It also builds cmark
 ### develpment build
 
 ```
-make build-dev
+make INC=dev build-dev
 ```
 
 This is the development openresty image

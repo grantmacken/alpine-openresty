@@ -6,6 +6,7 @@ OR_LATEST := $(T)/openresty-latest.version
 
 define hOR
 # openresty docker install
+ docker build --t=
 
 Multi stage docker build
  1: download source
@@ -18,75 +19,34 @@ endef
 
 .SECONDARY:
 
+DOWNLOADS := downloadOpenresty downloadOpenssl downloadZlib downloadPcre
+
 .PHONY: perlModules cmark
 
 # TARGETS
+
+default: install
 
 orHelp: export HOR := $(hOR)
 orHelp:
 	@echo "$${HOR}"
 
-default: orHelp
+ifneq ($(INC),)
+include inc/*.mk
+endif
 
 install: $(T)/install.log
+	@echo 'additions'
 	@$(MAKE) perlModules
 	@$(MAKE) cmark
-
-build-prod: export RESTY_VERSION := $(shell \
- curl -sSL https://openresty.org/en/download.html |\
- grep -oE 'openresty-([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)' |\
- sed 's/openresty-//' |\
- head -1)
-build-prod:
-	@echo "## $@ ##"
-	@echo "TASK: build the docker production image[ v$$RESTY_VERSION ] "
-	@docker build \
- --target="prod" \
- --tag="$(DOCKER_IMAGE)" \
- --tag="$(DOCKER_IMAGE):v$$RESTY_VERSION" \
- --tag="$(DOCKER_IMAGE)-prod" \
- --tag="$(DOCKER_IMAGE)-prod:v$$RESTY_VERSION" \
- .
-
-build-dev: export RESTY_VERSION := $(shell \
- curl -sSL https://openresty.org/en/download.html |\
- grep -oE 'openresty-([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)' |\
- sed 's/openresty-//' |\
- head -1)
-build-dev:
-	@docker build \
- --target="dev" \
- --tag="$(DOCKER_IMAGE)-dev" \
- --tag="$(DOCKER_IMAGE)-dev:v$$RESTY_VERSION" \
- .
-
-push-prod: export RESTY_VERSION := $(shell \
- curl -sSL https://openresty.org/en/download.html |\
- grep -oE 'openresty-([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)' |\
- sed 's/openresty-//' |\
- head -1)
-push-prod:
-	@echo "## $@ ##"
-	@docker push $(DOCKER_IMAGE):v$$RESTY_VERSION
-
-push-dev: export RESTY_VERSION := $(shell \
- curl -sSL https://openresty.org/en/download.html |\
- grep -oE 'openresty-([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)' |\
- sed 's/openresty-//' |\
- head -1)
-push-dev:
-	@echo "## $@ ##"
-	@docker push $(DOCKER_IMAGE)-dev
-	@docker push $(DOCKER_IMAGE)-dev:v$$RESTY_VERSION
-
-pull:
-	@echo "## $@ ##"
-	@docker pull $(DOCKER_IMAGE):latest
 
 perlModules:
 	@echo "# $(notdir $@) #"
 	@wget -O - https://cpanmin.us | perl - App::cpanminus \
-  &&  cpanm --skip-installed -n Test::Base IPC::Run Test::Nginx App::Prove
+  &&  cpanm --skip-installed -n Test::Base IPC::Run Test::Nginx \
+ Term::ANSIColor Term::Encoding \
+ TAP::Formatter::Base TAP::Formatter::HTML \
+ App::Prove App::Prove::Plugin::HTML App::Prove::Plugin::retty
 
 cmark:
 	@echo "# $(notdir $@) #"
@@ -167,7 +127,7 @@ downloadPcre: $(T)/pcre-latest.version
 	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloaded [ $(shell cat $<) ] "; else false;fi;
 	@echo '------------------------------------------------'
 
-$(T)/configure.log: downloadOpenresty downloadOpenssl downloadZlib downloadPcre
+$(T)/install.log: $(DOWNLOADS)
 	@echo "$(notdir $@) "
 	@echo " - sanity checks "
 	@[ -d $(T)/$(shell cat $(OR_LATEST)) ]
@@ -191,18 +151,6 @@ $(T)/configure.log: downloadOpenresty downloadOpenssl downloadZlib downloadPcre
  --without-http_fastcgi_module \
  --without-http_uwsgi_module \
  --without-http_ssi_module \
- --without-http_scgi_module >> configure.log 2>&1
+ --without-http_scgi_module \
+ && make && make install | tee -a install.log
 	@echo '------------------------------------------------'
-
-$(T)/make.log: $(T)/configure.log
-	@echo "$(notdir $@) " &> $(@)
-	@cd $(T)/$(shell cat $(OR_LATEST));\
- make -j$(shell grep ^proces /proc/cpuinfo | wc -l ) >> make.log 2>&1
-	@echo '------------------------------------------------'
-
-$(T)/install.log: $(T)/make.log
-	@echo "$(notdir $@) " &> $(@)
-	@cd $(T)/$(shell cat $(OR_LATEST)); make install | tee -a install.log
-	@echo '------------------------------------------------'
-
-

@@ -1,13 +1,13 @@
 # Dockerfile grantmacken/alpine-openresty
 # https://github.com/grantmacken/alpine-openresty
-FROM alpine:3.7 as packager
+FROM alpine:3.7 as pack
 LABEL maintainer="Grant Mackenzie <grantmacken@gmail.com>"
 ENV OPENRESTY_HOME /usr/local/openresty
 ENV OPENRESTY_BIN /usr/local/openresty/bin
-ENV INSTALL_PATH /grantmacken
-RUN mkdir -p $INSTALL_PATH
+ENV INSTALL_PATH /home
 WORKDIR $INSTALL_PATH
 COPY Makefile Makefile
+COPY .env .env
 # build-base like build-essentials
 # contains make
 # First Stage:
@@ -26,7 +26,7 @@ RUN apk add --no-cache --virtual .build-deps \
   gd-dev \
   readline-dev \
   && mkdir tmp \
-  && make -j$(grep ^proces /proc/cpuinfo | wc -l) install \
+  && make \
   && rm -rf tmp \
   && apk del .build-deps
 
@@ -36,7 +36,7 @@ FROM alpine:3.7 as dev
 ENV OPENRESTY_HOME /usr/local/openresty
 ENV OPENRESTY_BIN /usr/local/openresty/bin
 WORKDIR $OPENRESTY_HOME
-COPY --from=packager /usr/local /usr/local
+COPY --from=pack /usr/local /usr/local
 RUN apk add --no-cache \
     gd \
     geoip \
@@ -63,8 +63,8 @@ ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]
 FROM alpine:3.7 as prod
 ENV OPENRESTY_HOME /usr/local/openresty
 ENV OPENRESTY_BIN /usr/local/openresty/bin
-COPY --from=packager /usr/local/openresty /usr/local/openresty
-COPY --from=packager /usr/local/lib/lib* /usr/local/lib/
+COPY --from=pack /usr/local/openresty /usr/local/openresty
+COPY --from=pack /usr/local/lib/lib* /usr/local/lib/
 WORKDIR $OPENRESTY_HOME
 RUN apk add --no-cache \
     gd \
@@ -81,11 +81,4 @@ EXPOSE 80 443
 STOPSIGNAL SIGTERM
 ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]
 
-
-# DEV notes:
-# home/t  is for the 'prove' tests dir
-# home/bin  is the for 'resty cli'
-# not sure about keeping 
-# libxslt \
-# geoip \
 
