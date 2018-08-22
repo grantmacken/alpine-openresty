@@ -9,7 +9,7 @@ services:
 env:
   global:
     - DOCKER_IMAGE="grantmacken/alpine-openresty"
-    - MAKEFLAGS="-j 2"
+    - MAKEFLAGS="-j 4"
 # before_- MAKEFLAGS="-j 2"script:
 #   - docker pull "$IMAGE" || true
 # script:
@@ -31,5 +31,7 @@ jobs:
       - pwd
       - which make
       - which cat
+      - mkdir tmp
       script:
         - make downloads
+        - cat ./tmp/zlib-latest.version
