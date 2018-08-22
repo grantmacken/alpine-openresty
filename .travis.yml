@@ -31,4 +31,4 @@ jobs:
       - which make
       - which cat
       script:
-        - cat Makefile
+        - make downloads
