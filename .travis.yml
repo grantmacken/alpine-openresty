@@ -9,7 +9,8 @@ services:
 env:
   global:
     - DOCKER_IMAGE="grantmacken/alpine-openresty"
-# before_script:
+    - MAKEFLAGS="-j 2"
+# before_- MAKEFLAGS="-j 2"script:
 #   - docker pull "$IMAGE" || true
 # script:
 #   - docker build --pull --cache-from "$IMAGE" --tag "$IMAGE" .

@@ -17,13 +17,15 @@ endef
 
 .SECONDARY:
 
-downloads := downloadOpenresty downloadOpenssl downloadZlib downloadPcre
+DOWNLOADS := downloadOpenresty downloadOpenssl downloadZlib downloadPcre
 
 .PHONY: perlModules cmark
 
 # TARGETS
 
 default: install
+
+downloads: $(DOWNLOADS)
 
 orHelp: export HOR := $(hOR)
 orHelp:
@@ -125,7 +127,7 @@ downloadPcre: $(T)/pcre-latest.version
 	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloaded [ $(shell cat $<) ] "; else false;fi;
 	@echo '------------------------------------------------'
 
-$(T)/install.log: $(downloads)
+$(T)/install.log: $(DOWNLOADS)
 	@echo "$(notdir $@) "
 	@echo " - sanity checks "
 	@[ -d $(T)/$(shell cat $(OR_LATEST)) ]
