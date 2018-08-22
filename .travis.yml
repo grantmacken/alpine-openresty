@@ -24,7 +24,6 @@ env:
 
 jobs:
    include:
-    - if: branch = master
     - stage: build base docker image
       install: skip
       script:
