@@ -25,13 +25,15 @@ env:
 jobs:
    include:
     - stage: download versioning
-      env:
-      - DOCKER_TAG=4.3.1
       before_install:
       - pwd
       - which make
       - which cat
       - mkdir tmp
       script:
-        - make downloads
-        - cat ./tmp/zlib-latest.version
+        - make tmp/openresty-latest.version
+        - cat  tmp/openresty-latest.version | grep -oE '([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)'
+        - export DOCKER_TAG=$(cat tmp/openresty-latest.version | grep -oE '([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)')
+    - stage: install from sources
+      script:
+        - echo ${DOCKER_TAG}
