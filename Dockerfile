@@ -30,7 +30,7 @@ RUN apk add --no-cache --virtual .build-deps \
 
 #  Second Stage:  dev
 
-FROM alpine:3.7 as dev
+FROM alpine:3.7 as base
 ENV OPENRESTY_HOME /usr/local/openresty
 ENV OPENRESTY_BIN /usr/local/openresty/bin
 WORKDIR $OPENRESTY_HOME
@@ -43,12 +43,9 @@ RUN apk add --no-cache \
     perl \
     curl \
     && mkdir -p /etc/letsencrypt/live \
-    && mkdir  /home/t \
-    && mkdir  /home/bin \
     && ln -s $OPENRESTY_BIN/openresty /usr/local/bin \
     && ln -s $OPENRESTY_BIN/openresty /usr/local/bin/nginx \
     && ln -s $OPENRESTY_BIN/resty /usr/local/bin \
-    && ln -s /home/t $OPENRESTY_HOME \
     && ln -sf /dev/stdout $OPENRESTY_HOME/nginx/logs/access.log \
     && ln -sf /dev/stderr $OPENRESTY_HOME/nginx/logs/error.log
 
