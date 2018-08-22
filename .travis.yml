@@ -26,7 +26,9 @@ jobs:
     - stage: download versioning
       env:
       - DOCKER_TAG=4.3.1
-      install: make downloads
+      before_install:
+      - pwd
+      - which make
+      - which cat
       script:
-        - cat tmp/zlib-latest.version
-
+        - cat Makefile
