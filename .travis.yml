@@ -8,15 +8,25 @@ services:
   - docker
 env:
   global:
-    - IMAGE="grantmacken/alpine-openresty"
-before_script:
-  - docker pull "$IMAGE" || true
-script:
-  - docker build --pull --cache-from "$IMAGE" --tag "$IMAGE" .
-  - docker run -d $IMAGE
-after_script:
-  - docker images
-  - docker ps
-  - docker run --entrypoint "" $IMAGE ls -al .
-  - docker run --entrypoint "" $IMAGE ./bin/openresty -V
-  - docker-compose version
+    - DOCKER_IMAGE="grantmacken/alpine-openresty"
+# before_script:
+#   - docker pull "$IMAGE" || true
+# script:
+#   - docker build --pull --cache-from "$IMAGE" --tag "$IMAGE" .
+#   - docker run -d $IMAGE
+# after_script:
+#   - docker images
+#   - docker ps
+#   - docker run --entrypoint "" $IMAGE ls -al .
+#   - docker run --entrypoint "" $IMAGE ./bin/openresty -V
+#   - docker-compose version
+
+jobs:
+   include:
+    - stage: download versioning
+      env:
+      - DOCKER_TAG=4.3.1
+      install: make downloads
+      script:
+        - cat tmp/zlib-latest.version
+

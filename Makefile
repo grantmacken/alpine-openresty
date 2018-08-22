@@ -1,7 +1,5 @@
-DOCKER_IMAGE := grantmacken/alpine-openresty
 T := tmp
 TAR_SUF := s/\(\.tar\.gz\)*$$//
-
 OR_LATEST := $(T)/openresty-latest.version
 
 define hOR
@@ -19,7 +17,7 @@ endef
 
 .SECONDARY:
 
-DOWNLOADS := downloadOpenresty downloadOpenssl downloadZlib downloadPcre
+downloads := downloadOpenresty downloadOpenssl downloadZlib downloadPcre
 
 .PHONY: perlModules cmark
 
@@ -127,7 +125,7 @@ downloadPcre: $(T)/pcre-latest.version
 	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloaded [ $(shell cat $<) ] "; else false;fi;
 	@echo '------------------------------------------------'
 
-$(T)/install.log: $(DOWNLOADS)
+$(T)/install.log: $(downloads)
 	@echo "$(notdir $@) "
 	@echo " - sanity checks "
 	@[ -d $(T)/$(shell cat $(OR_LATEST)) ]

@@ -4,7 +4,7 @@
 [![](https://images.microbadger.com/badges/image/grantmacken/alpine-openresty.svg)](https://microbadger.com/images/grantmacken/alpine-openresty "Get your own image badge on microbadger.com")
 [![Build Status](https://travis-ci.org/grantmacken/alpine-openresty.svg?branch=master)](https://travis-ci.org/grantmacken/alpine-openresty)
 
-This is a base openresty slim  docker image
+This is a base openresty slim docker image
 to be used as the FROM basis for other images
 or for defining services in a docker-compose.yml file
 
@@ -54,7 +54,7 @@ make INC=prod build-prod
 This is the production openresty image built from sources.
 It also builds cmark 
 
-### develpment build
+### development build
 
 ```
 make INC=dev build-dev
