@@ -60,25 +60,25 @@ STOPSIGNAL SIGTERM
 ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]
 
 # Third Stage: prod
-FROM alpine:3.7 as prod
-ENV OPENRESTY_HOME /usr/local/openresty
-ENV OPENRESTY_BIN /usr/local/openresty/bin
-COPY --from=pack /usr/local/openresty /usr/local/openresty
-COPY --from=pack /usr/local/lib/lib* /usr/local/lib/
-WORKDIR $OPENRESTY_HOME
-RUN apk add --no-cache \
-    gd \
-    geoip \
-    libgcc \
-    libxslt \
-    && mkdir -p /etc/letsencrypt/live \
-    && ln -s $OPENRESTY_BIN/openresty /usr/local/bin \
-    && ln -sf /dev/stdout $OPENRESTY_HOME/nginx/logs/access.log \
-    && ln -sf /dev/stderr $OPENRESTY_HOME/nginx/logs/error.log
+# FROM alpine:3.7 as prod
+# ENV OPENRESTY_HOME /usr/local/openresty
+# ENV OPENRESTY_BIN /usr/local/openresty/bin
+# COPY --from=pack /usr/local/openresty /usr/local/openresty
+# COPY --from=pack /usr/local/lib/lib* /usr/local/lib/
+# WORKDIR $OPENRESTY_HOME
+# RUN apk add --no-cache \
+#     gd \
+#     geoip \
+#     libgcc \
+#     libxslt \
+#     && mkdir -p /etc/letsencrypt/live \
+#     && ln -s $OPENRESTY_BIN/openresty /usr/local/bin \
+#     && ln -sf /dev/stdout $OPENRESTY_HOME/nginx/logs/access.log \
+#     && ln -sf /dev/stderr $OPENRESTY_HOME/nginx/logs/error.log
 
-ENV LANG C.UTF-8
-EXPOSE 80 443
-STOPSIGNAL SIGTERM
-ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]
+# ENV LANG C.UTF-8
+# EXPOSE 80 443
+# STOPSIGNAL SIGTERM
+# ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]
 
 
