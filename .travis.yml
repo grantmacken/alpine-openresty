@@ -9,19 +9,6 @@ services:
 env:
   global:
     - DOCKER_IMAGE="grantmacken/alpine-openresty"
-    - MAKEFLAGS="-j 4"
-# before_- MAKEFLAGS="-j 2"script:
-#   - docker pull "$IMAGE" || true
-# script:
-#   - docker build --pull --cache-from "$IMAGE" --tag "$IMAGE" .
-#   - docker run -d $IMAGE
-# after_script:
-#   - docker images
-#   - docker ps
-#   - docker run --entrypoint "" $IMAGE ls -al .
-#   - docker run --entrypoint "" $IMAGE ./bin/openresty -V
-#   - docker-compose version
-
 jobs:
    include:
     - stage: build base docker image
@@ -33,8 +20,8 @@ jobs:
       - export DOCKER_TAG=$(cat tmp/openresty-latest.version | grep -oE '([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)')
       - docker build --tag ${DOCKER_IMAGE}:base-v${DOCKER_TAG} .
     - stage: build base docker image
-      script:
       install: skip
+      script:
       - mkdir -p tmp
       - make tmp/openresty-latest.version
       - export DOCKER_TAG=$(cat tmp/openresty-latest.version | grep -oE '([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)')
