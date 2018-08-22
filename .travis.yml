@@ -24,18 +24,17 @@ env:
 
 jobs:
    include:
-    - stage: download versioning
-      before_install:
-      - pwd
-      - which make
-      - which cat
-      - mkdir tmp
+    - if: branch = master
+    - stage: build base docker image
       script:
-        - make tmp/openresty-latest.version
-        - cat  tmp/openresty-latest.version | grep -oE '([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)'
-        - export DOCKER_TAG=$(cat tmp/openresty-latest.version | grep -oE '([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)')
-    - stage: install from sources
+      - mkdir -p tmp
+      - make tmp/openresty-latest.version
+      - export DOCKER_TAG=$(cat tmp/openresty-latest.version | grep -oE '([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)')
+      - docker build --tag ${DOCKER_IMAGE}:base-v${DOCKER_TAG} .
+    - stage: build base docker image
       script:
-        - export DOCKER_TAG=$(cat tmp/openresty-latest.version | grep -oE '([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)')
-        - echo "${DOCKER_TAG}"
-        - docker build --tag ${DOCKER_IMAGE}:${DOCKER_TAG} .
+      - mkdir -p tmp
+      - make tmp/openresty-latest.version
+      - export DOCKER_TAG=$(cat tmp/openresty-latest.version | grep -oE '([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)')
+      - echo "${DOCKER_TAG}"
+
