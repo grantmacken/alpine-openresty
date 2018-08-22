@@ -2,10 +2,7 @@
 # https://github.com/grantmacken/alpine-openresty
 FROM alpine:3.7 as pack
 LABEL maintainer="Grant Mackenzie <grantmacken@gmail.com>"
-ENV OPENRESTY_HOME /usr/local/openresty
-ENV OPENRESTY_BIN /usr/local/openresty/bin
-ENV INSTALL_PATH /home
-WORKDIR $INSTALL_PATH
+WORKDIR /home
 COPY Makefile Makefile
 COPY .env .env
 # build-base like build-essentials
@@ -26,6 +23,7 @@ RUN apk add --no-cache --virtual .build-deps \
   gd-dev \
   readline-dev \
   && mkdir tmp \
+  && export MAKEFLAGS="-j 4" \
   && make \
   && rm -rf tmp \
   && apk del .build-deps
