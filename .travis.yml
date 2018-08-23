@@ -9,9 +9,13 @@ services:
 env:
   global:
     - DOCKER_IMAGE="grantmacken/alpine-openresty"
+stages:
+  - base
+    if: branch = master
+
 jobs:
    include:
-    - stage: build base docker image
+    - stage: base
       install: skip
       script:
       - echo '${DOCKER_USERNAME}'
@@ -22,7 +26,7 @@ jobs:
       - echo "${DOCKER_IMAGE}"
       - echo 'DOCKER TAG: '
       - echo "${DOCKER_TAG}"
-      - docker build --tag ${DOCKER_IMAGE}:base-v${DOCKER_TAG} .
+      - docker build --tag ${DOCKER_IMAGE}:base-v${DOCKER_TAG} . >/dev/null 2>&1
       - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
       - docker push ${DOCKER_IMAGE}:base-v${DOCKER_TAG}
 
