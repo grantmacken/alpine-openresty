@@ -12,11 +12,19 @@ script:
   - make tmp/openresty-latest.version
   - export DOCKER_TAG=base-v$(cat tmp/openresty-latest.version | grep -oE '([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)')
   - echo "${DOCKER_TAG}"
-  - docker build --tag  "grantmacken/alpine-openresty:${DOCKER_TAG}" .
+  - docker build --tag  "grantmacken/alpine-openresty:${DOCKER_TAG}" . >/dev/null 2>&1
   - docker-compose up -d
-  - docker ps
+  - docker ps | grep ${DOCKER_TAG}
+  - docker exec or ls .
+  - docker exec or which resty
+  - docker exec or which openresty
 
-# - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-# - docker push "grantmacken/alpine-openresty:base-v${DOCKER_TAG}"
+before_deploy:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+deploy:
+  provider: script
+  script: echo "${DOCKER_TAG}"
+  on:
+    branch: master
 
-
+#  - docker push "grantmacken/alpine-openresty:base-v${DOCKER_TAG}"
