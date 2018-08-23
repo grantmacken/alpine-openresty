@@ -23,8 +23,8 @@ before_deploy:
   - echo "$DOCKER_PASSWORD" | docker login -u grantmacken --password-stdin
 deploy:
   provider: script
-  script: echo "${DOCKER_TAG}"
+  script: docker push "grantmacken/alpine-openresty:base-v${DOCKER_TAG}"
   on:
     branch: master
 
-#  - docker push "grantmacken/alpine-openresty:base-v${DOCKER_TAG}"
+#  - 
