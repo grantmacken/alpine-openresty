@@ -1,17 +1,44 @@
 version: '3.4'
 services:
   openresty:
-    build:
-      context: .
-      cache_from:
-        - alpine:3.7
-    image: grantmacken/alpine-openresty
+    image: grantmacken/alpine-openresty:latest
     container_name: or
+    hostname: orhost
     ports:
         - 80:80
         - 443:443
     networks:
       - www
+    env_file: .env
+    volumes:
+      - type: volume
+        source: html
+        target: ${OPENRESTY_HOME}/nginx/html
+      - type: volume
+        source: conf
+        target: ${OPENRESTY_HOME}/nginx/conf
+      - type: volume
+        source: site
+        target: ${OPENRESTY_HOME}/site
+      - type: volume
+        source: letsencrypt
+        target: ${LETSENCRYPT}
+volumes:
+  data:
+    driver: local
+    name: data
+  site:
+    driver: local
+    name: site
+  conf:
+    driver: local
+    name: conf
+  html:
+    driver: local
+    name: html
+  letsencrypt:
+    driver: local
+    name: letsencrypt
 networks:
   www:
     driver: bridge

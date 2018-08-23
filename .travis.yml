@@ -6,19 +6,17 @@ os: linux
 language: c
 services:
   - docker
+install: skip
+script:
+  - mkdir -p tmp
+  - make tmp/openresty-latest.version
+  - export DOCKER_TAG=$(cat tmp/openresty-latest.version | grep -oE '([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)')
+  - echo "${DOCKER_TAG}"
+  - docker build --tag  "grantmacken/alpine-openresty:base-v${DOCKER_TAG}" .
+  - docker build --tag  "grantmacken/alpine-openresty:base-v${DOCKER_TAG}" .
+  - docker-compose up -d
 
-jobs:
-   include:
-    - stage: base
-      if: branch = master
-      install: skip
-      script:
-      - mkdir -p tmp
-      - make tmp/openresty-latest.version
-      - export DOCKER_TAG=$(cat tmp/openresty-latest.version | grep -oE '([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)')
-      - echo "${DOCKER_TAG}"
-      - docker build --tag  "grantmacken/alpine-openresty:base-v${DOCKER_TAG}" .
-      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-      - docker push "grantmacken/alpine-openresty:base-v${DOCKER_TAG}"
+# - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+# - docker push "grantmacken/alpine-openresty:base-v${DOCKER_TAG}"
 
 
