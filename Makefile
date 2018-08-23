@@ -149,7 +149,6 @@ $(T)/install.log: $(DOWNLOADS)
  --without-http_fastcgi_module \
  --without-http_uwsgi_module \
  --without-http_ssi_module \
- --without-http_scgi_module
-	@cd $(T)/$(shell cat $(OR_LATEST)) && make  >/dev/null 2>&1 \
-	@cd $(T)/$(shell cat $(OR_LATEST)) && make install | tee -a install.log
+ --without-http_scgi_module \
+ && make && make install | tee -a install.log
 	@echo '------------------------------------------------'
