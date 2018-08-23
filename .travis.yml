@@ -6,9 +6,6 @@ os: linux
 language: c
 services:
   - docker
-env:
-  global:
-    - DOCKER_IMAGE="grantmacken/alpine-openresty"
 
 jobs:
    include:
@@ -16,16 +13,12 @@ jobs:
       if: branch = master
       install: skip
       script:
-      - echo '${DOCKER_USERNAME}'
       - mkdir -p tmp
       - make tmp/openresty-latest.version
       - export DOCKER_TAG=$(cat tmp/openresty-latest.version | grep -oE '([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)')
-      - echo 'DOCKER IMAGE '
-      - echo -n "${DOCKER_IMAGE}"
-      - echo 'DOCKER TAG '
       - echo "${DOCKER_TAG}"
-      - docker build --tag ${DOCKER_IMAGE}:base-v${DOCKER_TAG} . >/dev/null 2>&1
+      - docker build --tag  "grantmacken/alpine-exist:base-v${DOCKER_TAG}" .
       - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-      - docker push ${DOCKER_IMAGE}:base-v${DOCKER_TAG}
+      - docker push "grantmacken/alpine-exist:base-v${DOCKER_TAG}"
 
 
