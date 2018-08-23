@@ -15,6 +15,7 @@ script:
   - docker build --tag  "grantmacken/alpine-openresty:base-v${DOCKER_TAG}" .
   - docker build --tag  "grantmacken/alpine-openresty:base-v${DOCKER_TAG}" .
   - docker-compose up -d
+  - docker ps
 
 # - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 # - docker push "grantmacken/alpine-openresty:base-v${DOCKER_TAG}"
