@@ -18,9 +18,13 @@ jobs:
       - mkdir -p tmp
       - make tmp/openresty-latest.version
       - export DOCKER_TAG=$(cat tmp/openresty-latest.version | grep -oE '([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)')
-      - echo "build image: ${DOCKER_IMAGE}:base-v${DOCKER_TAG}"
+      - echo -n 'DOCKER IMAGE: '
+      - echo "${DOCKER_IMAGE}"
+      - echo -n 'DOCKER TAG: '
+      - echo "${DOCKER_TAG}"
       - docker build --tag ${DOCKER_IMAGE}:base-v${DOCKER_TAG} .  >/dev/null 2>&1
       - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+      - docker push ${DOCKER_IMAGE}:base-v${DOCKER_TAG}
     - stage: build base docker image
       install: skip
       script:
