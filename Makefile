@@ -150,5 +150,6 @@ $(T)/install.log: $(DOWNLOADS)
  --without-http_uwsgi_module \
  --without-http_ssi_module \
  --without-http_scgi_module \
- && make && make install | tee -a install.log
+ && make  >/dev/null 2>&1 \
+ && make install | tee -a install.log
 	@echo '------------------------------------------------'

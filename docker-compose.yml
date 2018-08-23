@@ -1,15 +1,16 @@
 version: '3.4'
 services:
   openresty:
-    image: grantmacken/alpine-openresty:latest
+    image: ${DOCKER_IMAGE}:${DOCKER_TAG}
     container_name: or
     hostname: orhost
+    env_file:
+     - ./.env
     ports:
         - 80:80
         - 443:443
     networks:
       - www
-    env_file: .env
     volumes:
       - type: volume
         source: html
