@@ -25,8 +25,6 @@ DOWNLOADS := downloadOpenresty downloadOpenssl downloadZlib downloadPcre
 
 default: install
 
-downloads: $(DOWNLOADS)
-
 orHelp: export HOR := $(hOR)
 orHelp:
 	@echo "$${HOR}"
