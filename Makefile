@@ -1,47 +1,15 @@
-T := tmp
-TAR_SUF := s/\(\.tar\.gz\)*$$//
-OR_LATEST := $(T)/openresty-latest.version
+include .env
 
-define hOR
-# openresty docker install
- docker build --t=
-
-Multi stage docker build
- 1: download source
- 2: install from sources
- 3: from base alpine copy over openresty
-
-make targets
-
-endef
-
-.SECONDARY:
-
-DOWNLOADS := downloadOpenresty downloadOpenssl downloadZlib downloadPcre
-
-.PHONY: perlModules cmark
-
+# DOWNLOADS := downloadOpenresty downloadOpenssl downloadZlib downloadPcre
+# .PHONY: perlModules cmark
 # TARGETS
 
 default: install
 
-orHelp: export HOR := $(hOR)
-orHelp:
-	@echo "$${HOR}"
-
-ifneq ($(INC),)
-include inc/*.mk
-endif
-
-install: $(T)/install.log
-	@echo 'additions'
-	@$(MAKE) perlModules
-	@$(MAKE) cmark
-
-perlModules:
+.PHONY: perl-modules
+perl-modules:
 	@echo "# $(notdir $@) #"
-	@wget -O - https://cpanmin.us | perl - App::cpanminus \
-  &&  cpanm --skip-installed -n Test::Base IPC::Run Test::Nginx \
+	@cpanm --skip-installed -n Test::Base IPC::Run Test::Nginx \
  Term::ANSIColor Term::Encoding \
  TAP::Formatter::Base TAP::Formatter::HTML \
  App::Prove App::Prove::Plugin::HTML App::Prove::Plugin::retty
@@ -53,92 +21,85 @@ cmark:
  tar xz --directory $(T)
 	@cd $(T)/cmark-0.28.3; make && make install
 
-$(OR_LATEST):
+.PHONY: zlib-download
+zlib-download:
 	@echo "# $(notdir $@) #"
-	@echo 'Task: fetch the latest openresty version'
-	@curl -sSL https://openresty.org/en/download.html |\
- grep -oE 'openresty-([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)' |\
- head -1 > $(@)
-	@if [ -n "$$( cat $@ )" ] ; then echo " - obtained version [ $$( cat $@ ) ] "; else false;fi;
+	@wget -nH --cut-dirs=100 --quiet --show-progress  --progress=bar:force:noscroll \
+ --mirror 'http://www.zlib.net/fossils/zlib-$(ZLIB_VER).tar.gz'
+	@cp zlib-$(ZLIB_VER).tar.gz openresty-zlib_$(ZLIB_VER).orig.tar.gz
 	@echo '------------------------------------------------'
 
-downloadOpenresty: $(OR_LATEST)
+.PHONY: zlib-build
+zlib-build: | zlib-download
 	@echo "# $(notdir $@) #"
-	@echo 'Task: download  [ https://openresty.org/download/$(shell cat $<).tar.gz ]'
-	@curl -sSL https://openresty.org/download/$(shell cat $<).tar.gz | \
- tar xz --directory $(T)
-	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloaded [ $(shell cat $<) ] "; else false;fi;
+	@mkdir openresty-zlib
+	@tar xf openresty-zlib_$(ZLIB_VER).orig.tar.gz --strip-components=1 -C openresty-zlib
 	@echo '------------------------------------------------'
 
-$(T)/openssl-latest.version:
-	@echo " $(notdir $@) "
-	@echo 'TASK:  fetch the latest openssl version'
-	@curl -sSL https://www.openssl.org/source/ | \
- grep -oE 'openssl-1.0.2[a-z]{1}\.tar\.gz' | \
- head -1 | sed -e '$(TAR_SUF)'  > $(@)
-	@if [ -s $@ ] ; then echo " - obtained version [ $$( cat $@ ) ] "; else false;fi;
-	@echo '----------------------------'
-
-#note the prefix 'openssl-'
-
-downloadOpenssl: $(T)/openssl-latest.version
+.PHONY: pcre-download
+pcre-download:
 	@echo "# $(notdir $@) #"
-	@echo 'Task: download: [ https://www.openssl.org/source/$(shell cat $<).tar.gz ] '
-	@curl -sSL https://www.openssl.org/source/$(shell cat $<).tar.gz | \
- tar xz --directory $(T)
-	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloaded [ $(shell cat $<) ] "; else false;fi;
+	@wget -nH --cut-dirs=100 --quiet --show-progress  --progress=bar:force:noscroll \
+ --mirror 'https://ftp.pcre.org/pub/pcre/pcre-$(PCRE_VER).tar.bz2'
+	@cp pcre-$(PCRE_VER).tar.bz2 openresty-pcre_$(PCRE_VER).orig.tar.bz2
 	@echo '------------------------------------------------'
 
-$(T)/zlib-latest.version:
+.PHONY: pcre-build
+pcre-build: | pcre-download
 	@echo "# $(notdir $@) #"
-	@echo 'Task: fetch the latest zlib version'
-	@curl -sSL http://zlib.net/ |\
- grep -oE 'zlib-[0-9\.]+\.tar\.gz' |\
- head -1 | sed -e '$(TAR_SUF)' > $(@)
-	@if [ -n "$$( cat $@ )" ] ; then echo " - obtained version [ $$( cat $@ ) ] "; else false;fi;
+	@mkdir openresty-pcre
+	@tar xf openresty-pcre_$(PCRE_VER).orig.tar.bz2 --strip-components=1 -C openresty-pcre
 	@echo '------------------------------------------------'
 
-downloadZlib: $(T)/zlib-latest.version
+.PHONY: openssl-download
+openssl-download:
 	@echo "# $(notdir $@) #"
-	@echo 'Task:  download [ http://zlib.net/$(shell cat $<).tar.gz ] '
-	@curl -sSL http://zlib.net/$(shell cat $<).tar.gz | tar xz --directory $(T)
-	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloaded [ $(shell cat $<) ] "; else false;fi;
+	wget -nH --cut-dirs=100 --quiet --show-progress  --progress=bar:force:noscroll  \
+ --mirror 'https://www.openssl.org/source/openssl-$(SSL_VER).tar.gz'
+	cp openssl-$(SSL_VER).tar.gz openresty-openssl_$(SSL_VER).orig.tar.gz
+	@echo '------------------------------------------------'
+
+.PHONY: openssl-build
+openssl-build: |  openssl-download
+	@echo "# $(notdir $@) #"
+	@mkdir openresty-openssl
+	tar xf openresty-openssl_$(SSL_VER).orig.tar.gz --strip-components=1 -C openresty-openssl
+	@echo '------------------------------------------------'
+
+.PHONY: openresty-download
+openresty-download:
+	@echo "# $(notdir $@) #"
+	@wget -nH --cut-dirs=100  --quiet --show-progress  --progress=bar:force:noscroll \
+ --mirror 'https://openresty.org/download/openresty-$(OR_VER).tar.gz'
+	@cp openresty-$(OR_VER).tar.gz openresty_$(OR_VER).orig.tar.gz
+	@echo '------------------------------------------------'
+
+.PHONY: openresty-build
+openresty-build: | openresty-download
+	@echo "# $(notdir $@) #"
+	@mkdir openresty
+	tar xf openresty_$(OR_VER).orig.tar.gz --strip-components=1 -C openresty
 	@echo '------------------------------------------------'
 
 # note: travis having difficulty with ftp try http
 # note: for pcre source use tail
-
-$(T)/pcre-latest.version:
-	@echo "# $(notdir $@) #"
-	@echo 'Task: fetch the latest pcre version'
-	@curl -sSL https://ftp.pcre.org/pub/pcre/ |\
- grep -oE 'pcre-[0-9\.]+\.tar\.gz' |\
- tail -1 | sed -e '$(TAR_SUF)' > $(@)
-	@if [ -n "$$( cat $@ )" ] ; then echo " - obtained version [ $$( cat $@ ) ] "; else false;fi;
-	@echo '------------------------------------------------'
-
-downloadPcre: $(T)/pcre-latest.version
-	@echo "# $(notdir $@) #"
-	@echo 'Task: download [ https://ftp.pcre.org/pub/pcre/$(shell cat $<).tar.gz ] '
-	@curl -f -sSL https://ftp.pcre.org/pub/pcre/$(shell cat $<).tar.gz | \
- tar xz --directory $(T)
-	@cd $(T);if [ -d $(shell cat $<) ] ; then echo " - downloaded [ $(shell cat $<) ] "; else false;fi;
-	@echo '------------------------------------------------'
-
-$(T)/install.log: $(DOWNLOADS)
+.PHONY: install
+install: zlib-build pcre-build openssl-build openresty-build
 	@echo "$(notdir $@) "
+	@rm -f *.orig.tar.*
 	@echo " - sanity checks "
-	@[ -d $(T)/$(shell cat $(OR_LATEST)) ]
-	@[ -d $(T)/$(shell cat $(T)/zlib-latest.version) ]
-	@[ -d $(T)/$(shell cat $(T)/pcre-latest.version) ]
-	@[ -d $(T)/$(shell cat $(T)/openssl-latest.version) ]
+	@ls -al .
+	@[ -d /home/openresty ]
+	@[ -d /home/openresty-zlib ]
+	@[ -d /home/openresty-openssl ]
+	@[ -d /home/openresty-pcre ]
 	@echo " - configure and install "
-	@cd $(T)/$(shell cat $(OR_LATEST));\
+	@cd openresty;\
  ./configure \
- --with-pcre="../$(shell cat $(T)/pcre-latest.version)" \
+ --with-pcre="/home/openresty-pcre" \
  --with-pcre-jit \
- --with-zlib="../$(shell cat $(T)/zlib-latest.version)" \
- --with-openssl="../$(shell cat $(T)/openssl-latest.version)" \
+ --with-zlib='/home/openresty-zlib' \
+ --with-openssl='/home/openresty-openssl' \
  --with-http_v2_module \
  --with-http_ssl_module \
  --with-http_gzip_static_module \
@@ -150,5 +111,25 @@ $(T)/install.log: $(DOWNLOADS)
  --without-http_uwsgi_module \
  --without-http_ssi_module \
  --without-http_scgi_module \
- && make && make install | tee -a install.log
+ && make && make install
 	@echo '------------------------------------------------'
+
+#with-openssl='/home/openresty-openssl' \
+
+.PHONY: base
+base:
+	@echo $(OR_VER)
+	@docker build \
+  --target="base" \
+  --tag="$(DOCKER_IMAGE):v$(OR_VER)" \
+ .
+
+.PHONY: dev
+dev:
+	@echo $(OR_VER)
+	@docker build \
+  --target="dev" \
+  --tag="$(DOCKER_IMAGE):dev" \
+ .
+
+

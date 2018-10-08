@@ -18,7 +18,7 @@ script:
   - docker exec or ls . | grep 'nginx'
   - docker exec or which resty | grep 'resty'
   - docker exec or which openresty | grep 'openresty'
-  - echo "$DOCKER_PASSWORD" | docker login -u grantmacken --password-stdin
-  - docker push "grantmacken/alpine-openresty:${DOCKER_TAG}"
+# - echo "$DOCKER_PASSWORD" | docker login -u grantmacken --password-stdin
+# - docker push "grantmacken/alpine-openresty:${DOCKER_TAG}"
 
 

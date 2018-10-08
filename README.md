@@ -1,19 +1,18 @@
 # alpine-openresty
-[WIP] minimal docker image for openresty
+[WIP] alpine docker image for openresty
 
 [![](https://images.microbadger.com/badges/image/grantmacken/alpine-openresty.svg)](https://microbadger.com/images/grantmacken/alpine-openresty "Get your own image badge on microbadger.com")
 [![Build Status](https://travis-ci.org/grantmacken/alpine-openresty.svg?branch=master)](https://travis-ci.org/grantmacken/alpine-openresty)
 
-This is a base openresty slim docker image
-to be used as the FROM basis for other images
-or for defining services in a docker-compose.yml file
+openresty alpine docker images built from source
+
 
 Clone or Fork this repo
 
 ```
 docker build --target=pack .
+docker build --target=base .
 docker build --target=dev .
-docker build --target=prod .
 ```
 
 You might want to change some openresty 
@@ -41,30 +40,32 @@ firefox  http://localhost:80
 docker-compose down
 ```
 
-## Makefile Targets
+## Build Targets
 
-Images can be built via the Makefile
+## pack
 
-### production build
-
-```
-make INC=prod build-prod
-```
-
-This is the production openresty image built from sources.
-It also builds cmark 
-
-### development build
-
-```
-make INC=dev build-dev
-```
-
-This is the development openresty image
-In addition to the stuff in the prod image it contains 
+As well as building openresty it contains 
 the tools required to running
  - OPM the openresty package manager 
  - Nginx::Test the openresty data driven test framework.
+
+
+## base
+
+This adds some OPM modules
+
+## dev
+
+This creates my WIP development environment from my dorex repo
+
+It adds my own WIP lua modules that used when working with the eXist data store
+
+
+
+
+ 
+
+
 
 
 
