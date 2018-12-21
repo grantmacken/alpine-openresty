@@ -14,71 +14,73 @@ perl-modules:
  TAP::Formatter::Base TAP::Formatter::HTML \
  App::Prove App::Prove::Plugin::HTML App::Prove::Plugin::retty
 
-cmark:
+source/cmark/archive/$(CMARK).tar.gz:
 	@echo "# $(notdir $@) #"
-	@echo 'Task: download  [ https://github.com/commonmark/cmark/archive/0.28.3.tar.gz ]'
-	@curl -sSL https://github.com/commonmark/cmark/archive/0.28.3.tar.gz | \
- tar xz --directory $(T)
-	@cd $(T)/cmark-0.28.3; make && make install
+	@echo 'Task: download  [ https://github.com/commonmark/cmark/archive/$(CMARK).tar.gz ]'
+	@wget -nH --cut-dirs=1 -P source --quiet --show-progress  --progress=bar:force:noscroll \
+ --mirror 'https://github.com/commonmark/cmark/archive/$(CMARK).tar.gz'
+	@#curl -sSL https://github.com/commonmark/cmark/archive/0.28.3.tar.gz tar xz --directory $(T)
+	@#cd $(T)/cmark-0.28.3; make && make install
 
-.PHONY: zlib-download
-zlib-download:
+.PHONY: cmark-build
+cmark-build: source/cmark/archive/$(CMARK).tar.gz
 	@echo "# $(notdir $@) #"
-	@wget -nH --cut-dirs=100 --quiet --show-progress  --progress=bar:force:noscroll \
+	@mkdir -p cmark
+	@tar xf $< --strip-components=1 -C cmark
+	@cd cmark; make && make install
+	@echo '------------------------------------------------'
+
+source/zlib-$(ZLIB_VER).tar.gz:
+	@echo "# $(notdir $@) #"
+	@wget -nH --cut-dirs=1 -P source --quiet --show-progress  --progress=bar:force:noscroll \
  --mirror 'http://www.zlib.net/fossils/zlib-$(ZLIB_VER).tar.gz'
-	@cp zlib-$(ZLIB_VER).tar.gz openresty-zlib_$(ZLIB_VER).orig.tar.gz
 	@echo '------------------------------------------------'
 
 .PHONY: zlib-build
-zlib-build: | zlib-download
+zlib-build: source/zlib-$(ZLIB_VER).tar.gz
 	@echo "# $(notdir $@) #"
-	@mkdir openresty-zlib
-	@tar xf openresty-zlib_$(ZLIB_VER).orig.tar.gz --strip-components=1 -C openresty-zlib
+	@mkdir -p openresty-zlib
+	@tar xf $< --strip-components=1 -C openresty-zlib
 	@echo '------------------------------------------------'
 
-.PHONY: pcre-download
-pcre-download:
+source/pcre-$(PCRE_VER).tar.bz2:
 	@echo "# $(notdir $@) #"
-	@wget -nH --cut-dirs=100 --quiet --show-progress  --progress=bar:force:noscroll \
+	@wget -nH --cut-dirs=2 -P source --quiet --show-progress  --progress=bar:force:noscroll \
  --mirror 'https://ftp.pcre.org/pub/pcre/pcre-$(PCRE_VER).tar.bz2'
-	@cp pcre-$(PCRE_VER).tar.bz2 openresty-pcre_$(PCRE_VER).orig.tar.bz2
 	@echo '------------------------------------------------'
 
 .PHONY: pcre-build
-pcre-build: | pcre-download
+pcre-build: source/pcre-$(PCRE_VER).tar.bz2
 	@echo "# $(notdir $@) #"
-	@mkdir openresty-pcre
-	@tar xf openresty-pcre_$(PCRE_VER).orig.tar.bz2 --strip-components=1 -C openresty-pcre
+	@mkdir -p openresty-pcre
+	@tar xf $< --strip-components=1 -C openresty-pcre
 	@echo '------------------------------------------------'
 
-.PHONY: openssl-download
-openssl-download:
+source/openssl-$(SSL_VER).tar.gz:
 	@echo "# $(notdir $@) #"
-	wget -nH --cut-dirs=100 --quiet --show-progress  --progress=bar:force:noscroll  \
+	wget -nH --quiet --show-progress  --progress=bar:force:noscroll  \
  --mirror 'https://www.openssl.org/source/openssl-$(SSL_VER).tar.gz'
-	cp openssl-$(SSL_VER).tar.gz openresty-openssl_$(SSL_VER).orig.tar.gz
 	@echo '------------------------------------------------'
 
 .PHONY: openssl-build
-openssl-build: |  openssl-download
+openssl-build: source/openssl-$(SSL_VER).tar.gz
 	@echo "# $(notdir $@) #"
-	@mkdir openresty-openssl
-	tar xf openresty-openssl_$(SSL_VER).orig.tar.gz --strip-components=1 -C openresty-openssl
+	@mkdir -p openresty-openssl
+	tar xf $< --strip-components=1 -C openresty-openssl
 	@echo '------------------------------------------------'
 
-.PHONY: openresty-download
-openresty-download:
+download/openresty-$(OR_VER).tar.gz:
 	@echo "# $(notdir $@) #"
-	@wget -nH --cut-dirs=100  --quiet --show-progress  --progress=bar:force:noscroll \
+	@wget -nH --quiet --show-progress  --progress=bar:force:noscroll \
  --mirror 'https://openresty.org/download/openresty-$(OR_VER).tar.gz'
-	@cp openresty-$(OR_VER).tar.gz openresty_$(OR_VER).orig.tar.gz
 	@echo '------------------------------------------------'
 
 .PHONY: openresty-build
-openresty-build: | openresty-download
-	@echo "# $(notdir $@) #"
-	@mkdir openresty
-	tar xf openresty_$(OR_VER).orig.tar.gz --strip-components=1 -C openresty
+openresty-build: download/openresty-$(OR_VER).tar.gz
+	@echo "# $@ #"
+	@echo "# $< #"
+	@mkdir -p openresty
+	tar xf $< --strip-components=1 -C openresty
 	@echo '------------------------------------------------'
 
 # note: travis having difficulty with ftp try http
@@ -121,7 +123,7 @@ base:
 	@echo $(OR_VER)
 	@docker build \
   --target="base" \
-  --tag="$(DOCKER_IMAGE):v$(OR_VER)" \
+  --tag="$(DOCKER_IMAGE):base-v$(OR_VER)" \
  .
 
 .PHONY: dev
@@ -129,7 +131,8 @@ dev:
 	@echo $(OR_VER)
 	@docker build \
   --target="dev" \
-  --tag="$(DOCKER_IMAGE):dev" \
+  --tag="$(DOCKER_IMAGE):v$(OR_VER)" \
+  --tag="$(DOCKER_IMAGE):dev-v$(OR_VER)" \
  .
 
 
