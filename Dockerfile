@@ -14,6 +14,7 @@ COPY .env .env
 RUN apk add --no-cache --virtual .build-deps \
   build-base \
   curl \
+  cmake \
   gd-dev \
   geoip-dev \
   libxslt-dev \
@@ -24,10 +25,10 @@ RUN apk add --no-cache --virtual .build-deps \
   perl-dev \
   perl-utils \
   perl-app-cpanminus \
-  && export MAKEFLAGS="-j4" \
   && echo 'openresty install' \
   && make install \
   && make perl-modules \
+  && make cmark-build \
   && rm -r /home/* \
   && apk del .build-deps
 
