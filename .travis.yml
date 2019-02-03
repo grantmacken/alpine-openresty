@@ -1,7 +1,7 @@
 # Travis yaml grantmacken/alpine-openresty
 # https://github.com/grantmacken/alpine-openresty
 sudo: required
-dist: trusty
+dist: xenial
 os: linux
 language: c
 services:
@@ -9,8 +9,7 @@ services:
 install: skip
 script:
   - mkdir -p tmp
-  - make tmp/openresty-latest.version
-  - export DOCKER_TAG=base-v$(cat tmp/openresty-latest.version | grep -oE '([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)')
+  - export DOCKER_TAG=v$(cat .env | grep -oP '^OR_VER=\K(.+)$')
   - echo "${DOCKER_TAG}"
   - docker build --tag  "grantmacken/alpine-openresty:${DOCKER_TAG}" . >/dev/null 2>&1
   - docker-compose up -d
