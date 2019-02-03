@@ -1,7 +1,7 @@
 # Dockerfile grantmacken/alpine-openresty
 # https://github.com/grantmacken/alpine-openresty
 
-FROM alpine:3.8 as pack
+FROM alpine:3.9 as pack
 LABEL maintainer="Grant Mackenzie <grantmacken@gmail.com>"
 WORKDIR /home
 # build-base like build-essentials
@@ -37,7 +37,7 @@ RUN apk add --no-cache --virtual .build-deps \
 # https://github.com/openresty/openresty-packaging/blob/master/deb/Makefile
 #  Second Stage:  dev
 
-FROM alpine:3.8 as base
+FROM alpine:3.9 as base
 ENV OPENRESTY_HOME /usr/local/openresty
 ENV OPENRESTY_BIN /usr/local/openresty/bin
 WORKDIR $OPENRESTY_HOME
@@ -74,7 +74,7 @@ ENV OPENRESTY_HOME /usr/local/openresty
 WORKDIR /home
 COPY .env .env
 
-RUN export DOREX=v0.0.4 \
+RUN source .env \
   && mkdir -p  $OPENRESTY_HOME/nginx/html/.well-known/acme-challenge \
   && mkdir -p $OPENRESTY_HOME/site/lualib/grantmacken \
   && mkdir -p $OPENRESTY_HOME/t \
