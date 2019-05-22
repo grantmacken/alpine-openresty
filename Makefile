@@ -1,9 +1,5 @@
 include .env
 
-# DOWNLOADS := downloadOpenresty downloadOpenssl downloadZlib downloadPcre
-# .PHONY: perlModules cmark
-# TARGETS
-
 default: install
 
 .PHONY: perl-modules
@@ -69,6 +65,8 @@ openssl-build: source/openssl-$(SSL_VER).tar.gz
 	tar xf $< --strip-components=1 -C openresty-openssl
 	@echo '------------------------------------------------'
 
+# https://openresty.org/en/
+
 download/openresty-$(OR_VER).tar.gz:
 	@echo "# $(notdir $@) #"
 	@wget -nH --quiet --show-progress  --progress=bar:force:noscroll \
@@ -86,24 +84,22 @@ openresty-build: download/openresty-$(OR_VER).tar.gz
 # note: travis having difficulty with ftp try http
 # note: for pcre source use tail
 .PHONY: install
-install: zlib-build pcre-build openssl-build openresty-build
+install:  pcre-build openssl-build openresty-build
 	@echo "$(notdir $@) "
 	@rm -f *.orig.tar.*
 	@echo " - sanity checks "
 	@ls -al .
-	@[ -d /home/openresty ]
-	@[ -d /home/openresty-zlib ]
 	@[ -d /home/openresty-openssl ]
 	@[ -d /home/openresty-pcre ]
+	@[ -d /home/openresty ]
 	@echo " - configure and install "
 	@cd openresty;\
  ./configure \
  --with-pcre="/home/openresty-pcre" \
  --with-pcre-jit \
- --with-zlib='/home/openresty-zlib' \
- --with-openssl='/home/openresty-openssl' \
  --with-http_v2_module \
  --with-http_ssl_module \
+ --with-openssl="/home/openresty-openssl" \
  --with-http_gzip_static_module \
  --with-http_gunzip_module \
  --without-http_empty_gif_module \
@@ -112,27 +108,58 @@ install: zlib-build pcre-build openssl-build openresty-build
  --without-http_fastcgi_module \
  --without-http_uwsgi_module \
  --without-http_ssi_module \
- --without-http_scgi_module \
- && make && make install
-	@echo '------------------------------------------------'
+ --without-http_scgi_module
+	@cd openresty && make
+	@cd openresty && make install
 
 #with-openssl='/home/openresty-openssl' \
 
-.PHONY: base
-base:
+# .PHONY: build-base
+# build-base:
+# 	@echo $(OR_VER)
+# 	@docker build \
+#   --target="base" \
+#   --tag="$(DOCKER_IMAGE):base-v$(OR_VER)" \
+ .
+
+# .PHONY: build
+# build:
+# 	@echo $(OR_VER)
+# 	@docker build \
+#   --target="dev" \
+#   --tag="$(DOCKER_IMAGE):v$(OR_VER)" \
+#   --tag="$(DOCKER_IMAGE):$(DOCKER_TAG)" \
+#  .
+
+.PHONY: pack
+pack:
+	@echo $(OR_VER)
+	@docker build \
+  --target="pack" \
+  --tag="$(DOCKER_IMAGE):pack" \
+ .
+
+.PHONY: build
+build:
 	@echo $(OR_VER)
 	@docker build \
   --target="base" \
-  --tag="$(DOCKER_IMAGE):base-v$(OR_VER)" \
- .
-
-.PHONY: dev
-dev:
-	@echo $(OR_VER)
-	@docker build \
-  --target="dev" \
+  --tag="$(DOCKER_IMAGE):$(DOCKER_TAG)" \
   --tag="$(DOCKER_IMAGE):v$(OR_VER)" \
-  --tag="$(DOCKER_IMAGE):dev-v$(OR_VER)" \
+  --tag="$(DOCKER_IMAGE):2019-05-23" \
  .
 
 
+.PHONY: push
+push:
+	@echo '## $@ ##'
+	@docker push $(DOCKER_IMAGE):v$(OR_VER)
+	@docker push $(DOCKER_IMAGE):$(DOCKER_TAG)
+
+.PHONY: clean
+clean:
+	@docker images -a | grep "grantmacken" | awk '{print $3}' | xargs docker rmi
+
+.PHONY: travis
+travis: 
+	@travis env set DOCKER_USERNAME $(shell git config --get user.name)
