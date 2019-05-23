@@ -7,14 +7,14 @@ alpine docker image for openresty
 openresty alpine docker image built from source
 
 This repo represents is my current working environment,
-and as such, it is not the smallest possible image.
+and as such, it is not the smallest possible image. 
+
 It provides a base image from which I create my *development*
 and *production* images
 
 latest image based on
  - alpine: 3.9
  - OpenResty: 1.15.8.1
-
 
 Clone or fork this repo
 
@@ -24,16 +24,13 @@ make build
 <!-- docker build --target=dev . -->
 
 You might want to change some openresty 
- [ --with --without ]
+ [ --with --without ] 
 configure options in the Makefile to fit your requirement.
 
-In this repo the docker-compose.yml published port is 80 443
+In this repo the docker-compose.yml publish port is 80 443
 
 ```
-docker-compose config
 docker-compose up -d
-w3m -dump http://localhost:80
-firefox  http://localhost:80
 docker-compose down
 ```
 
@@ -57,7 +54,7 @@ the tools required to run
 
 This target adds some OPM modules
 
-1. pintsized/lua-resty-http
+1. ledgetech/lua-resty-http
 2. SkyLothar/lua-resty-jwt
 3. bungle/lua-resty-reqargs
 
