@@ -8,6 +8,8 @@ openresty alpine docker image built from source
 
 This repo represents is my current working environment,
 and as such, it is not the smallest possible image.
+It provides a base image from which I create my *development*
+and *production* images
 
 latest image based on
  - alpine: 3.9
@@ -17,10 +19,9 @@ latest image based on
 Clone or fork this repo
 
 ```
-docker build .
+make build
 ```
 <!-- docker build --target=dev . -->
-
 
 You might want to change some openresty 
  [ --with --without ]

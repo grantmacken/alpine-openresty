@@ -10,15 +10,15 @@ install: make build
 script:
   - docker-compose up -d
   - docker ps
-  - docker exec or ls . | grep 'nginx'
+  - docker exec orBase ls . | grep 'nginx'
   - docker exec orBase which resty | grep 'resty'
   - docker exec orBase which opm | grep 'opm'
   - docker exec orBase which openresty | grep 'openresty'
   - curl http://localhost
   - docker-compose down
 # - docker push "grantmacken/alpine-openresty:${DOCKER_TAG}"
-# deploy:
-#   provider: script
-#   script: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin && make push
-#   on:
-#     branch: master
+deploy:
+  provider: script
+  script: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin && make push
+  on:
+    branch: master
