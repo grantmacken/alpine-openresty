@@ -1,27 +1,14 @@
 version: '3.4'
 services:
   openresty:
-    image: ${DOCKER_IMAGE}:${DOCKER_TAG}
-    container_name: or
-    hostname: orhost
+    image: ${DOCKER_IMAGE}:v${OR_VER}
+    container_name: orBase
     env_file:
      - ./.env
     ports:
         - 80:80
         - 443:443
-    networks:
-      - www
-    volumes:
-      - type: volume
-        source: letsencrypt
-        target: ${LETSENCRYPT}
 
-volumes:
-  letsencrypt:
-    driver: local
-    name: letsencrypt
 
-networks:
-  www:
-    driver: bridge
+
 
