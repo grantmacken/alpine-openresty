@@ -16,9 +16,9 @@ script:
   - docker exec orBase which openresty | grep 'openresty'
   - curl http://localhost
   - docker-compose down
-# - docker push "grantmacken/alpine-openresty:${DOCKER_TAG}"
-deploy:
-  provider: script
-  script: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin && make push
-  on:
-    branch: master
+#  - docker push "grantmacken/alpine-openresty:${DOCKER_TAG}"
+# deploy:
+#   provider: script
+#   script: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin && make push
+#   on:
+#     branch: master
