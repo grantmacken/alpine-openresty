@@ -1,0 +1,28 @@
+name: alpine-openresty-ci
+
+on:
+  push:
+    branches: master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: crazy-max/ghaction-docker-buildx@v1
+        with:
+          version: latest
+      - name: Run Buildx
+        run: |
+          make bld
+      # - name: Docker Login In and Push to dockerhub
+      #   run: |
+      #     source .env
+      #     echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin 
+      #     docker push ${DOCKER_IMAGE}:$(date --iso)-dev
+      #     docker push ${DOCKER_IMAGE}:latest
+      #     docker push ${DOCKER_IMAGE}:${OR_VER}
