@@ -186,8 +186,8 @@ RUN --mount=type=cache,target=/var/cache/apk \
     && opm get bungle/lua-resty-reqargs
 
 ENV OPENRESTY_HOME /usr/local/openresty
-WORKDIR /usr/local/openresty
 ENV LANG C.UTF-8
+WORKDIR /usr/local/openresty
 EXPOSE 80 443
 STOPSIGNAL SIGTERM
 ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]
@@ -199,9 +199,9 @@ RUN --mount=type=cache,target=/var/cache/apk \
     && apk add --update libgcc gd geoip libxslt \
     && mkdir -p /etc/letsencrypt/live
 
-ENV OPENRESTY_HOME  "${PREFIX}"
-WORKDIR ${OPENRESTY_HOME}
+ENV OPENRESTY_HOME /usr/local/openresty
 ENV LANG C.UTF-8
+WORKDIR /usr/local/openresty
 EXPOSE 80 443
 STOPSIGNAL SIGTERM
 ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]

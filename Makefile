@@ -49,11 +49,28 @@ min:
   --build-arg CMARK_VER='$(CMARK_VER)' \
  .
 
+.PHONY: run
+run:
+	@docker run \
+  -it --rm \
+  --name orMin \
+  --network www \
+  --publish 80:80 \
+  --detach \
+  --log-driver=journald \
+ $(DOCKER_IMAGE):$(DOCKER_TAG)
+	sleep 2
+	curl -s http://localhost/ 
+	#sudo journalctl -b CONTAINER_NAME=orMin --all
+
+.PHONY: stop
+stop:
+	@docker stop orMin 
 
 .PHONY: build
 build: clean-build build/conf/gidday.conf build/Dockerfile build/docker-compose.yml
 	@docker build \
- --tag='$(OPENRESTY_IMAGE):gidday' \
+ --tag='$(DOCKER_IMAGE):gidday' \
  .
 	@docker images | grep -oP 'gidday'
 	@docker-compose up -d
@@ -67,7 +84,7 @@ clean-build:
 	@rm -rf build
 
 define dkGidday
-FROM $(OPENRESTY_IMAGE):min as proxy
+FROM $(DOCKER_IMAGE):min as proxy
 RUN rm nginx/conf/*
 COPY ./conf/gidday.conf  $(OPENRESTY_HOME)/nginx/conf/nginx.conf
 endef
@@ -98,7 +115,7 @@ define dcGidday
 version: '3.7'
 services:
   openresty:
-    image: ${OPENRESTY_IMAGE}:gidday
+    image: ${DOCKER_IMAGE}:gidday
     ports:
         - 80:80
         - 443:443
