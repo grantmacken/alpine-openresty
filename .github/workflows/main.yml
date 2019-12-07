@@ -16,9 +16,15 @@ jobs:
         uses: crazy-max/ghaction-docker-buildx@v1
         with:
           version: latest
-      - name: Run Buildx
+      - name: make images
         run: |
           make bld
+          make dev
+          make min
+      - name: check images
+        run: |
+          docker images
+
       # - name: Docker Login In and Push to dockerhub
       #   run: |
       #     source .env

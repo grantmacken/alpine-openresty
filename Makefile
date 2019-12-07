@@ -24,6 +24,7 @@ dev:
 	@export DOCKER_BUILDKIT=1;
 	@docker buildx build -o type=docker \
   --target=dev \
+  --tag='$(DOCKER_IMAGE):dev-$(OPENRESTY_VER)' \
   --tag='$(DOCKER_IMAGE):dev' \
   --build-arg PREFIX='$(OPENRESTY_HOME)' \
   --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
@@ -33,12 +34,19 @@ dev:
   --build-arg CMARK_VER='$(CMARK_VER)' \
  .
 
-.PHONY: prod
-prod:
+.PHONY: min
+min:
 	@export DOCKER_BUILDKIT=1;
 	@docker buildx build -o type=docker \
-  --target="prod" \
-  --tag=$(DOCKER_IMAGE):prod \
+  --target=min \
+  --tag=$(DOCKER_IMAGE):min-$(OPENRESTY_VER) \
+  --tag=$(DOCKER_IMAGE):min \
+  --build-arg PREFIX='$(OPENRESTY_HOME)' \
+  --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
+  --build-arg ZLIB_VER='$(ZLIB_VER)' \
+  --build-arg PCRE_VER='$(PCRE_VER)' \
+  --build-arg OPENSSL_VER='$(OPENSSL_VER)' \
+  --build-arg CMARK_VER='$(CMARK_VER)' \
  .
 
 
@@ -59,7 +67,7 @@ clean-build:
 	@rm -rf build
 
 define dkGidday
-FROM $(OPENRESTY_IMAGE):prod as proxy
+FROM $(OPENRESTY_IMAGE):min as proxy
 RUN rm nginx/conf/*
 COPY ./conf/gidday.conf  $(OPENRESTY_HOME)/nginx/conf/nginx.conf
 endef

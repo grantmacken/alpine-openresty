@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:experimental
 # Dockerfile grantmacken/alpine-openresty
 # https://github.com/grantmacken/alpine-openresty
+
 FROM alpine:3.10.2 as bld
 # LABEL maintainer="${GIT_USER_NAME} <${GIT_USER_EMAIL}>"
 # https://github.com/ricardbejarano/nginx/blob/master/Dockerfile.musl
@@ -168,26 +169,31 @@ RUN --mount=type=cache,target=/var/cache/apk \
         libxslt \
         perl \
         curl \
+    && echo ' - create special directories' \
     && mkdir -p /etc/letsencrypt/live \
-    && mkdir -p ${PREFIX}/nginx/html/.well-known/acme-challenge \
-    && mkdir -p ${PREFIX}/site/lualib/grantmacken \
-    && mkdir -p ${PREFIX}/site/t \
-    && mkdir -p ${PREFIX}/bin \
-    && ln -s ${PREFIX}/bin/* /usr/local/bin \
-    && ln -s ${PREFIX}/bin/openresty /usr/local/bin/nginx \
+    && mkdir -p /usr/local/openresty/nginx/html/.well-known/acme-challenge \
+    && mkdir -p /usr/local/openresty/site/lualib/grantmacken \
+    && mkdir -p /usr/local/openresty/site/t \
+    && mkdir -p /usr/local/openresty/site/bin \
+    && ls /usr/local/openresty/site \
+    && echo '------------------'\
+    && ln -s /usr/local/openresty/bin/* /usr/local/bin/ \
+    && ls /usr/local/bin \
+    && echo '------------------'\
     && opm get ledgetech/lua-resty-http \
+    && ln -s ${PREFIX}/bin/openresty /usr/local/bin/nginx \
     && opm get SkyLothar/lua-resty-jwt \
     && opm get bungle/lua-resty-reqargs
 
-ENV OPENRESTY_HOME "${PREFIX}"
-WORKDIR ${OPENRESTY_HOME}
+ENV OPENRESTY_HOME /usr/local/openresty
+WORKDIR /usr/local/openresty
 ENV LANG C.UTF-8
 EXPOSE 80 443
 STOPSIGNAL SIGTERM
 ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]
 
-FROM alpine:3.10.2 as prod
-COPY --from=dev ${PREFIX} ${PREFIX}
+FROM alpine:3.10.2 as min
+COPY --from=dev /usr/local/openresty /usr/local/openresty
 RUN --mount=type=cache,target=/var/cache/apk \ 
     ln -vs /var/cache/apk /etc/apk/cache \
     && apk add --update libgcc gd geoip libxslt \
