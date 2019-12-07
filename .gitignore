@@ -7,3 +7,4 @@ cmark
 tmp
 proxy
 inc
+docker-compose.yml
