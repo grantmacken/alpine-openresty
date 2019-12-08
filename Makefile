@@ -19,7 +19,6 @@ bld:
 
 .PHONY: dev
 dev:
-	@echo '$(DOCKER_IMAGE)'
 	@export DOCKER_BUILDKIT=1;
 	@docker buildx build -o type=docker \
   --target=dev \
@@ -38,6 +37,7 @@ min:
 	@export DOCKER_BUILDKIT=1;
 	@docker buildx build -o type=docker \
   --target=min \
+  --tag='docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/min:$(OPENRESTY_VER)' \
   --tag=$(DOCKER_IMAGE):min-$(OPENRESTY_VER) \
   --tag=$(DOCKER_IMAGE):min \
   --build-arg PREFIX='$(OPENRESTY_HOME)' \
