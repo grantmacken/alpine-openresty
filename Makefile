@@ -23,7 +23,6 @@ dev:
 	@docker buildx build -o type=docker \
   --target=dev \
   --tag='$(DOCKER_IMAGE):dev-$(OPENRESTY_VER)' \
-  --tag='$(DOCKER_IMAGE):dev' \
   --build-arg PREFIX='$(OPENRESTY_HOME)' \
   --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
   --build-arg ZLIB_VER='$(ZLIB_VER)' \
@@ -39,7 +38,6 @@ min:
   --target=min \
   --tag='docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/min:$(OPENRESTY_VER)' \
   --tag=$(DOCKER_IMAGE):min-$(OPENRESTY_VER) \
-  --tag=$(DOCKER_IMAGE):min \
   --build-arg PREFIX='$(OPENRESTY_HOME)' \
   --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
   --build-arg ZLIB_VER='$(ZLIB_VER)' \
