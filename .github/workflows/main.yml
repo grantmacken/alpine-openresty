@@ -23,6 +23,7 @@ jobs:
           make min
       - name: check images
         run: |
+          docker network list  
           docker images
           make run
           make stop
