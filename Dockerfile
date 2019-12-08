@@ -173,7 +173,7 @@ RUN echo    ' - install cmark' \
     && rm -f ./cmark.tar.gz \
     && rm -r /tmp/cmark-${CMARK_VER} \
     && echo '---------------------------' \
-    && echo ' -  FINISH ' 
+    && echo ' -  FINISH ' \
     && echo '   --------' \
     && echo ' -  remove apk install deps' 
     && apk del .build-deps \
