@@ -17,7 +17,6 @@ bld:
   --build-arg CMARK_VER='$(CMARK_VER)' \
  .
 
-
 .PHONY: dev
 dev:
 	@echo '$(DOCKER_IMAGE)'

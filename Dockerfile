@@ -28,7 +28,7 @@ ARG CMARK_PREFIX="${PREFIX}/cmark"
 
 RUN --mount=type=cache,target=/var/cache/apk \ 
     ln -vs /var/cache/apk /etc/apk/cache \
-    && apk add --update  \
+    && apk add --virtual .build-deps \
         build-base \
         linux-headers \
         gd-dev \
@@ -38,8 +38,7 @@ RUN --mount=type=cache,target=/var/cache/apk \
         readline-dev \
         libgcc \
         perl-dev \
-        perl \
-        curl
+    && apk add --update perl curl
 
 WORKDIR = /home
 ADD https://zlib.net/zlib-${ZLIB_VER}.tar.gz ./zlib.tar.gz
@@ -54,6 +53,9 @@ RUN echo ' - install zlib' \
     && cd ${ZLIB_PREFIX} \
     && rm -rf ./share \
     && rm -rf ./lib/pkgconfig \
+    && cd /home \
+    && rm -f ./zlib.tar.gz \
+    && rm -r /tmp/zlib-${ZLIB_VER} \
     && echo '---------------------------' 
 
 WORKDIR = /home
@@ -75,6 +77,9 @@ RUN echo ' - install pcre' \
     && rm  -f ./lib/*.la \
     && rm  -f ./lib/*pcreposix* \
     && rm -rf ./lib/pkgconfig \
+    && cd /home \
+    && rm -f ./pcre.tar.gz \
+    && rm -r /tmp/pcre-${PCRE_VER} \
     && echo '---------------------------' 
 
 # https://github.com/openresty/openresty-packaging/blob/master/deb/openresty-openssl/debian/rules
@@ -101,6 +106,9 @@ RUN echo ' - install openssl' \
     && cd ${OPENSSL_PREFIX} \
     && rm -rf ./bin//bin/c_rehash \
     && rm -rf ./lib/pkgconfig \
+    && cd /home \
+    && rm -f ./openssl.tar.gz \
+    && rm -r /tmp/openssl-${OPENSSL_VER} \
     && echo '---------------------------' 
 
 WORKDIR = /home
@@ -146,7 +154,11 @@ RUN echo    ' - install openresty' \
     && cd ${PREFIX}    && echo '   ---------------' \
     && rm -rf ./luajit/share/man \
     && rm -rf ./luajit/lib/libluajit-5.1.a \
-    && echo '---------------------------' 
+    && cd /home \
+    && rm -f ./openresty.tar.gz \
+    && rm -r /tmp/openresty \
+    && echo '---------------------------'  
+
 
 WORKDIR = /home
 ADD https://github.com/commonmark/cmark/archive/${CMARK_VER}.tar.gz ./cmark.tar.gz
@@ -156,7 +168,17 @@ RUN echo    ' - install cmark' \
     && tar -C /tmp -xf ./cmark.tar.gz \
     && cd /tmp/cmark-${CMARK_VER} \
     && cmake \
-    && make install
+    && make install \
+    && cd /home \
+    && rm -f ./cmark.tar.gz \
+    && rm -r /tmp/cmark-${CMARK_VER} \
+    && echo '---------------------------' \
+    && echo ' -  FINISH ' 
+    && echo '   --------' \
+    && echo ' -  remove apk install deps' 
+    && apk del .build-deps \
+    && echo '---------------------------'  
+
 
 FROM alpine:3.10.2 as dev
 COPY --from=bld /usr/local /usr/local
