@@ -175,13 +175,8 @@ RUN --mount=type=cache,target=/var/cache/apk \
     && mkdir -p /usr/local/openresty/site/lualib/grantmacken \
     && mkdir -p /usr/local/openresty/site/t \
     && mkdir -p /usr/local/openresty/site/bin \
-    && ls /usr/local/openresty/site \
-    && echo '------------------'\
     && ln -s /usr/local/openresty/bin/* /usr/local/bin/ \
-    && ls /usr/local/bin \
-    && echo '------------------'\
     && opm get ledgetech/lua-resty-http \
-    && ln -s ${PREFIX}/bin/openresty /usr/local/bin/nginx \
     && opm get SkyLothar/lua-resty-jwt \
     && opm get bungle/lua-resty-reqargs
 

@@ -49,23 +49,43 @@ min:
   --build-arg CMARK_VER='$(CMARK_VER)' \
  .
 
+dkrStatus != docker ps --filter name=orMin --format 'status: {{.Status}}'
+dkrPortInUse != docker ps --format '{{.Ports}}' | grep -oP '^(.+):\K(\d{4})' | grep -oP "80"
+dkrNetworkInUse != docker network list --format '{{.Name}}' | grep -oP "$(NETWORK)"
+
 .PHONY: run
-run:
+run: | network
+	@$(if $(dkrNetworkInUse),echo  '- NETWORK [ $(NETWORK) ] is available',docker network create $(NETWORK))
+	@$(if $(dkrPortInUse), echo '- PORT [ 80 ] is already taken';false , echo  '- PORT [ 80 ] is available')
 	@docker run \
   -it --rm \
   --name orMin \
   --network www \
   --publish 80:80 \
   --detach \
-  --log-driver=journald \
  $(DOCKER_IMAGE):$(DOCKER_TAG)
-	sleep 2
-	curl -s http://localhost/ 
-	#sudo journalctl -b CONTAINER_NAME=orMin --all
+	@sleep 1
+	@curl -s http://localhost/ 
 
 .PHONY: stop
 stop:
 	@docker stop orMin 
+
+define msgPort
+    echo " - PORT [ $(XQERL_PORT) ] is already in use .. "
+    echo " - Change .env PORT number"
+    echo " - exiting ... "
+    exit 1
+endef
+
+
+
+
+
+.PHONY: network 
+network:
+	$(if $(shell docker network list --format '{{.Name}}' | grep -oP "$(NETWORK)"),true,\
+     docker network create $(NETWORK))
 
 .PHONY: build
 build: clean-build build/conf/gidday.conf build/Dockerfile build/docker-compose.yml
