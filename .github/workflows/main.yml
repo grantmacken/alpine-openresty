@@ -30,7 +30,7 @@ jobs:
           make stop
       - name: build image from built image
         run: make build
-      - name: Push to Dockerhub
+      - name: Push to Github Packages
         run: |
           source .env
           echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${{ secrets.DOCKER_USERNAME }} --password-stdin 
