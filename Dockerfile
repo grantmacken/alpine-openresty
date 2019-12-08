@@ -175,7 +175,7 @@ RUN echo    ' - install cmark' \
     && echo '---------------------------' \
     && echo ' -  FINISH ' \
     && echo '   --------' \
-    && echo ' -  remove apk install deps' 
+    && echo ' -  remove apk install deps' \
     && apk del .build-deps \
     && echo '---------------------------'  
 
