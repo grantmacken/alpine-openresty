@@ -33,8 +33,10 @@ jobs:
       - name: Docker Login In and Push to dockerhub
         run: |
           source .env
-          USER=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/user | jq -r .login)
+          USER=$(curl -s -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' https://api.github.com/user | jq -r .login)
+          REPO=$(echo ${GITHUB_REPOSITORY} | tr "[:upper:]" "[:lower:]")
           echo "${USER}"
+          echo "${REPO}"
           #echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin 
           # echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin 
           # docker push ${DOCKER_IMAGE}:dev-${OPENRESTY_VER}
