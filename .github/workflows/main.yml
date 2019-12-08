@@ -11,31 +11,40 @@ jobs:
         uses: actions/checkout@v1
         with:
           fetch-depth: 1
-      # - name: Set up Docker Buildx
-      #   id: buildx
-      #   uses: crazy-max/ghaction-docker-buildx@v1
-      #   with:
-      #     version: latest
-      # - name: make images
-      #   run: |
-      #     make bld
-      #     docker images
-      #     make dev
-      #     make min
-      # - name: check images
-      #   run: |
-      #     docker network list
-      #     docker images
-      #     make run
-      #     make stop
-      # - name: build image from built image
-      #   run: make build
-      - name: Docker Login In and Push to dockerhub
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: crazy-max/ghaction-docker-buildx@v1
+        with:
+          version: latest
+      - name: make images
+        run: |
+          make bld
+          docker images
+          make dev
+          make min
+      - name: check images
+        run: |
+          docker network list
+          docker images
+          make run
+          make stop
+      - name: build image from built image
+        run: make build
+      - name: Push to Dockerhub
         run: |
           source .env
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${{ secrets.DOCKER_USERNAME }} --password-stdin 
+          echo 
+          docker push ${DOCKER_IMAGE}:dev-${OPENRESTY_VER}
+          docker push ${DOCKER_IMAGE}:min-${OPENRESTY_VER}
+      - name: Push to Dockerhub
+        run: |
+          source .env
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${{ secrets.DOCKER_USERNAME }} --password-stdin 
           echo "${GITHUB_REPOSITORY}"          
-          echo "${USER}"
-          echo "${REPO}"
+          docker push docker.pkg.github.com/${GITHUB_REPOSITORY}/${DOCKER_IMAGE}:dev-${OPENRESTY_VER}
+          docker push docker.pkg.github.com/${DOCKER_IMAGE}:min-${OPENRESTY_VER}
+
           # curl --request POST \
           #   --url https://api.github.com/repos/${{ github.repository }}/issues \
           #   --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
@@ -44,7 +53,3 @@ jobs:
           #   "title": "Automated issue for commit: ${{ github.sha }}",
           #   "body": "This issue was automatically created by the GitHub Action workflow **${{ github.workflow }}**. \n\n The commit hash was: _${{ github.sha }}_."
           #   }'
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${{ secrets.DOCKER_USERNAME }} --password-stdin 
-          # echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin 
-          # docker push ${DOCKER_IMAGE}:dev-${OPENRESTY_VER}
-          # docker push ${DOCKER_IMAGE}:min-${OPENRESTY_VER}
