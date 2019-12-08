@@ -32,7 +32,7 @@ jobs:
       - name: Push to Dockerhub
         run: |
           source .env
-          echo ${{ secrets.DOCKER_PASSWORD }}${{ secrets.GITHUB_TOKEN }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin 
+          echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin 
           docker push ${DOCKER_IMAGE}:dev-${OPENRESTY_VER}
           docker push ${DOCKER_IMAGE}:min-${OPENRESTY_VER}
       - name: Push to Github Packages
