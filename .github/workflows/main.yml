@@ -11,30 +11,30 @@ jobs:
         uses: actions/checkout@v1
         with:
           fetch-depth: 1
-      # - name: Set up Docker Buildx
-      #   id: buildx
-      #   uses: crazy-max/ghaction-docker-buildx@v1
-      #   with:
-      #     version: latest
-      # - name: make images
-      #   run: |
-      #     make bld
-      #     docker images
-      #     make dev
-      #     make min
-      # - name: check images
-      #   run: |
-      #     docker network list
-      #     docker images
-      #     make run
-      #     make stop
-      # - name: build image from built image
-      #   run: make build
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: crazy-max/ghaction-docker-buildx@v1
+        with:
+          version: latest
+      - name: make images
+        run: |
+          make bld
+          docker images
+          make dev
+          make min
+      - name: check images
+        run: |
+          docker network list
+          docker images
+          make run
+          make stop
+      - name: build image from built image
+        run: make build
       - name: Docker Login In and Push to dockerhub
         run: |
           source .env
           echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin 
-          # docker push ${DOCKER_IMAGE}:dev
-          # docker push ${DOCKER_IMAGE}:dev-${OPENRESTY_VER}
-          # docker push ${DOCKER_IMAGE}:min
-          # docker push ${DOCKER_IMAGE}:min-${OPENRESTY_VER}
+          docker push ${DOCKER_IMAGE}:dev
+          docker push ${DOCKER_IMAGE}:dev-${OPENRESTY_VER}
+          docker push ${DOCKER_IMAGE}:min
+          docker push ${DOCKER_IMAGE}:min-${OPENRESTY_VER}
