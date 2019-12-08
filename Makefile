@@ -89,15 +89,15 @@ network:
 
 .PHONY: build
 build: clean-build build/conf/gidday.conf build/Dockerfile build/docker-compose.yml
-	@docker build \
+	@cd build; docker build \
  --tag='$(DOCKER_IMAGE):gidday' \
  .
 	@docker images | grep -oP 'gidday'
-	@docker-compose up -d
+	@cd build; docker-compose up -d
 	@sleep 1
-	@docker-compose logs
+	@cd build; docker-compose logs
 	@curl -s http://localhost
-	@docker-compose down
+	@cd build; docker-compose down
 
 .PHONY: clean-build
 clean-build:
@@ -135,6 +135,7 @@ define dcGidday
 version: '3.7'
 services:
   openresty:
+    container_name: orGidday
     image: ${DOCKER_IMAGE}:gidday
     ports:
         - 80:80
@@ -142,16 +143,18 @@ services:
 endef
 
 build/conf/gidday.conf: export ngxConfGidday:=$(ngxConfGidday)
-conf/gidday.conf:
-	@mkdir -p $@
-	@echo "$${mkGiddayConf}" > $@
+build/conf/gidday.conf:
+	@mkdir -p $(dir $@)
+	@echo "$${ngxConfGidday}" > $@
 
 build/Dockerfile: export dkGidday:=$(dkGidday)
-Dockerfile:
+build/Dockerfile:
+	@mkdir -p $(dir $@)
 	@echo "$${dkGidday}" > $@
 
 build/docker-compose.yml: export dcGidday:=$(dcGidday)
-docker-compose.yml:
+build/docker-compose.yml:
+	@mkdir -p $(dir $@)
 	@echo "$${dcGidday}" > $@
 
 

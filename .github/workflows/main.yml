@@ -25,6 +25,9 @@ jobs:
         run: |
           docker images
           make run
+          make stop
+      - name: build image from built image
+        run: make build
       # - name: Docker Login In and Push to dockerhub
       #   run: |
       #     source .env
