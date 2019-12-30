@@ -5,6 +5,7 @@ download
 openresty*
 cmark
 tmp
-proxy
+proxy/basic
+proxy/tests
 inc
 build
