@@ -62,7 +62,8 @@ run:
   --detach \
    $(DOCKER_IMAGE):min-$(OPENRESTY_VER)
 	@sleep 3
-	@curl -s https://localhost/ 
+	@docker ps
+	@docker logs orMin
 
 .PHONY: stop
 stop:
