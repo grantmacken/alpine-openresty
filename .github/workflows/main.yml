@@ -19,7 +19,6 @@ jobs:
       - name: make images
         run: |
           make bld
-          docker images
           make dev
           make min
       - name: check images
@@ -27,19 +26,19 @@ jobs:
           docker images
           make run
           make stop
-      - name: build image from built image
-        run: make build
-      - name: Push to Dockerhub
-        run: |
-          source .env
-          echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin 
-          docker push ${DOCKER_IMAGE}:dev-${OPENRESTY_VER}
-          docker push ${DOCKER_IMAGE}:min-${OPENRESTY_VER}
-      - name: Push to Github Packages
-        run: |
-          source .env
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
-          docker push docker.pkg.github.com/${REPO_OWNER}/${REPO_NAME}/min:${OPENRESTY_VER}
+      # - name: build image from built image
+      #   run: make build
+      # - name: Push to Dockerhub
+      #   run: |
+      #     source .env
+      #     echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin 
+      #     docker push ${DOCKER_IMAGE}:dev-${OPENRESTY_VER}
+      #     docker push ${DOCKER_IMAGE}:min-${OPENRESTY_VER}
+      # - name: Push to Github Packages
+      #   run: |
+      #     source .env
+      #     echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
+      #     docker push docker.pkg.github.com/${REPO_OWNER}/${REPO_NAME}/min:${OPENRESTY_VER}
         # curl --request POST \
         #   --url https://api.github.com/repos/${{ github.repository }}/issues \
         #   --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
