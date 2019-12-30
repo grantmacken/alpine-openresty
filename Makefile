@@ -1,6 +1,8 @@
 SHELL=/bin/bash
 include .env
 
+# DOCKER_PKG_GITHUB=docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/min:$(OPENRESTY_VER)
+
 
 .PHONY: bld
 bld:
@@ -36,7 +38,6 @@ min:
 	@export DOCKER_BUILDKIT=1;
 	@docker buildx build -o type=docker \
   --target=min \
-  --tag='docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/min:$(OPENRESTY_VER)' \
   --tag=$(DOCKER_IMAGE):min-$(OPENRESTY_VER) \
   --build-arg PREFIX='$(OPENRESTY_HOME)' \
   --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
@@ -55,87 +56,18 @@ run:
 	@$(if $(dkrNetworkInUse),echo  '- NETWORK [ $(NETWORK) ] is available',docker network create $(NETWORK))
 	@$(if $(dkrPortInUse), echo '- PORT [ 80 ] is already taken';false , echo  '- PORT [ 80 ] is available')
 	@docker run \
-  --rm \
+ --rm \
   --name orMin \
-  --network www \
   --publish 80:80 \
   --detach \
- $(DOCKER_IMAGE):$(DOCKER_TAG)
-	@sleep 1
-	@curl -s http://localhost/ 
+   $(DOCKER_IMAGE):min-$(OPENRESTY_VER)
+	@sleep 3
+	@curl -s https://localhost/ 
 
 .PHONY: stop
 stop:
-	@docker stop orMin 
+	@docker stop orMin
 
-.PHONY: build
-build: clean-build build/conf/gidday.conf build/Dockerfile build/docker-compose.yml
-	@cd build; docker build \
- --tag='$(DOCKER_IMAGE):gidday' \
- .
-	@docker images | grep -oP 'gidday'
-	@cd build; docker-compose up -d
-	@sleep 1
-	@cd build; docker-compose logs
-	@curl -s http://localhost
-	@cd build; docker-compose down
 
-.PHONY: clean-build
-clean-build:
-	@rm -rf build
-
-define dkGidday
-FROM $(DOCKER_IMAGE):min as proxy
-RUN rm nginx/conf/*
-COPY ./conf/gidday.conf  $(OPENRESTY_HOME)/nginx/conf/nginx.conf
-endef
-
-define ngxConfGidday
-worker_processes 1;
-pcre_jit on;
-events {
-  multi_accept       on;
-  worker_connections 1024;
-  use                epoll;
-}
-http {
-  lua_code_cache off;
-  server {
-    listen 80;
-    server_name or;
-    location / {
-      content_by_lua_block {
-        ngx.say('gidday from OpenResty lua content block')
-      }
-    }
- }
-}
-endef
-
-define dcGidday
-version: '3.7'
-services:
-  openresty:
-    container_name: orGidday
-    image: ${DOCKER_IMAGE}:gidday
-    ports:
-        - 80:80
-        - 443:443
-endef
-
-build/conf/gidday.conf: export ngxConfGidday:=$(ngxConfGidday)
-build/conf/gidday.conf:
-	@mkdir -p $(dir $@)
-	@echo "$${ngxConfGidday}" > $@
-
-build/Dockerfile: export dkGidday:=$(dkGidday)
-build/Dockerfile:
-	@mkdir -p $(dir $@)
-	@echo "$${dkGidday}" > $@
-
-build/docker-compose.yml: export dcGidday:=$(dcGidday)
-build/docker-compose.yml:
-	@mkdir -p $(dir $@)
-	@echo "$${dcGidday}" > $@
 
 
