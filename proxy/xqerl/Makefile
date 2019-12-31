@@ -18,25 +18,6 @@ build: clean \
 	@cd $(B); docker build --tag=$(PROXY_IMAGE) .
 	@docker images | grep '$(PROXY_CONTAINER_NAME)'
 
-.PHONY: push
-push:
-	echo $${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username $${{ secrets.DOCKER_USERNAME }} --password-stdin
-	docker push $(PROXY_IMAGE)
-
-.PHONY: rebuild
-rebuild:
-	@echo '## $(@)  ##'
-	cd $(B) && docker build --tag=$(PROXY_IMAGE) .
-
-.PHONY: run
-run:
-	@$(if $(dkrPortInUse), echo '- PORT [ 80 ] is already taken';false , echo  '- PORT [ 80 ] is available')
-	@docker run --rm --name orTest --publish 80:80 --detach $(PROXY_IMAGE)
-
-.PHONY: stop
-stop:
-	@docker stop orTest
-
 .PHONY: clean
 clean:
 	@echo '## $(@)  $(B) ##'
