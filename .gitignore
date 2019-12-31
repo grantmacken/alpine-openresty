@@ -7,5 +7,6 @@ cmark
 tmp
 proxy/basic
 proxy/tests
+proxy/xqerl/.build
 inc
 build

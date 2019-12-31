@@ -1,5 +1,7 @@
 # [alpine-openresty](https://github.com/grantmacken/alpine-openresty)
 
+
+
 [![](https://github.com/grantmacken/alpine-xqerl/workflows/CI/badge.svg)](https://github.com/grantmacken/alpine-openresty/actions)
 
 This repo provides a base image from which I create my *development* and *production* images
@@ -15,7 +17,8 @@ As well as building openresty, the image contains some stuff I find useful
  - a [commonmark](https://github.com/commonmark/CommonMark) implementaion: [cmark](https://github.com/commonmark/cmark)
 
 
+Available on [dockerhub](https://hub.docker.com/r/grantmacken/alpine-openresty)
 
-
+[![dockeri.co](https://dockeri.co/image/grantmacken/alpine-openresty)](https://hub.docker.com/r/grantmacken/alpine-openresty)
 
 
