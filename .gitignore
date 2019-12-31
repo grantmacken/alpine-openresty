@@ -8,5 +8,6 @@ tmp
 proxy/basic
 proxy/tests
 proxy/xqerl/.build
+proxy/xqerl/tmp
 inc
 build
