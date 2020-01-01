@@ -10,8 +10,9 @@ bld:
 	@echo '$(DOCKER_IMAGE)'
 	@export DOCKER_BUILDKIT=1;
 	@docker pull alpine:$(FROM_ALPINE_TAG)
-	@[[ $(LAST_ALPINE_VER) == $(FROM_ALPINE_TAG) ]]  || echo ' - updating dockerfile to latest alpine version';\
- sed -i 's/$(LAST_ALPINE_VER)/alpine:$(FROM_ALPINE_TAG)/g' Dockerfile 
+	@[[ $(LAST_ALPINE_VER) == $(FROM_ALPINE_TAG) ]]  || \
+ echo ' - updating dockerfile to latest alpine version'; \
+ sed -i 's/alpine:$(LAST_ALPINE_VER)/alpine:$(FROM_ALPINE_TAG)/g' Dockerfile 
 	@docker buildx build -o type=docker \
   --target=bld \
   --tag='$(DOCKER_IMAGE):bld' \
