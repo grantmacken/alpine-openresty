@@ -11,6 +11,9 @@ bld:
 	@docker buildx build -o type=docker \
   --target=bld \
   --tag='$(DOCKER_IMAGE):bld' \
+  --build-arg FROM_ALPINE_TAG='$(FROM_ALPINE_TAG)' \
+  --build-arg DEV_FROM_ALPINE_TAG='$(FROM_ALPINE_TAG)' \
+  --build-arg MIN_FROM_ALPINE_TAG='$(FROM_ALPINE_TAG)' \
   --build-arg PREFIX='$(OPENRESTY_HOME)' \
   --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
   --build-arg ZLIB_VER='$(ZLIB_VER)' \
