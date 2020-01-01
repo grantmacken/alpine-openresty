@@ -2,18 +2,19 @@ SHELL=/bin/bash
 include .env
 
 # DOCKER_PKG_GITHUB=docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/min:$(OPENRESTY_VER)
-
+#
+LAST_ALPINE_VER != grep -oP '^FROM alpine:\K[\d\.]+' Dockerfile | head -1
 
 .PHONY: bld
 bld:
 	@echo '$(DOCKER_IMAGE)'
 	@export DOCKER_BUILDKIT=1;
+	@docker pull alpine:$(FROM_ALPINE_TAG)
+	@[[ $(LAST_ALPINE_VER) == $(FROM_ALPINE_TAG) ]]  || echo ' - updating dockerfile to latest alpine version';\
+ sed -i 's/$(LAST_ALPINE_VER)/alpine:$(FROM_ALPINE_TAG)/g' Dockerfile 
 	@docker buildx build -o type=docker \
   --target=bld \
   --tag='$(DOCKER_IMAGE):bld' \
-  --build-arg FROM_ALPINE_TAG='$(FROM_ALPINE_TAG)' \
-  --build-arg DEV_FROM_ALPINE_TAG='$(FROM_ALPINE_TAG)' \
-  --build-arg MIN_FROM_ALPINE_TAG='$(FROM_ALPINE_TAG)' \
   --build-arg PREFIX='$(OPENRESTY_HOME)' \
   --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
   --build-arg ZLIB_VER='$(ZLIB_VER)' \

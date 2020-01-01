@@ -2,12 +2,10 @@
 # Dockerfile grantmacken/alpine-openresty
 # https://github.com/grantmacken/alpine-openresty
 
-ARG FROM_ALPINE_TAG
-FROM alpine:${FROM_ALPINE_TAG} as bld
+FROM alpine:alpine:3.11 as bld
 # LABEL maintainer="${GIT_USER_NAME} <${GIT_USER_EMAIL}>"
 # https://github.com/ricardbejarano/nginx/blob/master/Dockerfile.musl
 
-ARG DEV_FROM_ALPINE_TAG
 ARG PREFIX
 ARG OPENRESTY_VER
 ARG PCRE_VER
@@ -182,9 +180,8 @@ RUN echo    ' - install cmark' \
     && echo '---------------------------'  
 
 
-FROM alpine:${DEV_FROM_ALPINE_TAG} as dev
+FROM alpine:3.11 as dev
 
-ARG MIN_FROM_ALPINE_TAG
 COPY --from=bld /usr/local /usr/local
 RUN --mount=type=cache,target=/var/cache/apk \ 
     ln -s /var/cache/apk /etc/apk/cache \
@@ -213,7 +210,7 @@ EXPOSE 80 443
 STOPSIGNAL SIGTERM
 ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]
 
-FROM alpine:${MIN_FROM_ALPINE_TAG} as min
+FROM alpine:3.11 as min
 COPY --from=dev /usr/local/openresty /usr/local/openresty
 RUN --mount=type=cache,target=/var/cache/apk \ 
     ln -vs /var/cache/apk /etc/apk/cache \
