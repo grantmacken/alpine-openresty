@@ -50,8 +50,9 @@ dev:
 min:
 	@export DOCKER_BUILDKIT=1;
 	@docker buildx build -o type=docker \
-  --target=min \
-  --tag=$(DOCKER_IMAGE):min-$(OPENRESTY_VER) \
+  --target min \
+  --tag $(DOCKER_IMAGE):min-$(OPENRESTY_VER) \
+  --tag docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/$(PROXY_CONTAINER_NAME):$(PROXY_VER) \
   --build-arg PREFIX='$(OPENRESTY_HOME)' \
   --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
   --build-arg ZLIB_VER='$(ZLIB_VER)' \
