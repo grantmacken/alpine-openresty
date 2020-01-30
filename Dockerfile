@@ -180,6 +180,9 @@ RUN echo    ' - install cmark' \
     && echo '---------------------------'  
 
 
+# dev stage uses perl - curl uses by OPM 
+# we don't need the on production
+
 FROM alpine:3.11 as dev
 
 COPY --from=bld /usr/local /usr/local
@@ -193,10 +196,8 @@ RUN --mount=type=cache,target=/var/cache/apk \
         perl \
         curl \
     && echo ' - create special directories' \
-    && mkdir -p /etc/letsencrypt/live \
+    && mkdir -p /etc/letsencrypt \ 
     && mkdir -p /usr/local/openresty/nginx/html/.well-known/acme-challenge \
-    && mkdir -p /usr/local/openresty/site/lualib/grantmacken \
-    && mkdir -p /usr/local/openresty/site/t \
     && mkdir -p /usr/local/openresty/site/bin \
     && ln -s /usr/local/openresty/bin/* /usr/local/bin/ \
     && opm get ledgetech/lua-resty-http \
@@ -215,7 +216,8 @@ COPY --from=dev /usr/local/openresty /usr/local/openresty
 RUN --mount=type=cache,target=/var/cache/apk \ 
     ln -vs /var/cache/apk /etc/apk/cache \
     && apk add --update libgcc gd geoip libxslt \
-    && mkdir -p /etc/letsencrypt/live
+    && ln -s /usr/local/openresty/bin/* /usr/local/bin/ \
+    && mkdir -p /etc/letsencrypt
 
 ENV OPENRESTY_HOME /usr/local/openresty
 ENV LANG C.UTF-8

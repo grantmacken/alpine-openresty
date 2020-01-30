@@ -2,7 +2,13 @@ SHELL=/bin/bash
 include .env
 
 # DOCKER_PKG_GITHUB=docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/min:$(OPENRESTY_VER)
-#
+# Release links
+# https://github.com/openresty/docker-openresty/blob/master/alpine/Dockerfile
+# https://github.com/openssl/openssl/releases
+# https://www.pcre.org/  - always uses 8.3
+# https://www.zlib.net/
+# https://github.com/commonmark/cmark/releases
+
 LAST_ALPINE_VER != grep -oP '^FROM alpine:\K[\d\.]+' Dockerfile | head -1
 
 .PHONY: bld
