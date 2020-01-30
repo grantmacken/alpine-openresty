@@ -21,4 +21,10 @@ Available on [dockerhub](https://hub.docker.com/r/grantmacken/alpine-openresty)
 
 [![dockeri.co](https://dockeri.co/image/grantmacken/alpine-openresty)](https://hub.docker.com/r/grantmacken/alpine-openresty)
 
+Note: The provided docker versions of openresty are compiled with the sse_4.2 instruction set.
+If you pull and try to run on an older computer computer openresty will fail to run.
+
+```
+grep flags  /proc/cpuinfo | grep -o sse4_2
+```
 

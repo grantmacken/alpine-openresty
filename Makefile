@@ -11,6 +11,35 @@ include .env
 
 LAST_ALPINE_VER != grep -oP '^FROM alpine:\K[\d\.]+' Dockerfile | head -1
 
+.PHONY: build
+build: dev
+	@export DOCKER_BUILDKIT=1;
+	@docker buildx build -o type=docker \
+  --target min \
+  --tag $(DOCKER_IMAGE):min-$(OPENRESTY_VER) \
+  --tag docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/$(PROXY_CONTAINER_NAME):$(PROXY_VER) \
+  --build-arg PREFIX='$(OPENRESTY_HOME)' \
+  --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
+  --build-arg ZLIB_VER='$(ZLIB_VER)' \
+  --build-arg PCRE_VER='$(PCRE_VER)' \
+  --build-arg OPENSSL_VER='$(OPENSSL_VER)' \
+  --build-arg CMARK_VER='$(CMARK_VER)' \
+ .
+
+.PHONY: dev
+dev: bld
+	@export DOCKER_BUILDKIT=1;
+	@docker buildx build -o type=docker \
+  --target=dev \
+  --tag='$(DOCKER_IMAGE):dev-$(OPENRESTY_VER)' \
+  --build-arg PREFIX='$(OPENRESTY_HOME)' \
+  --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
+  --build-arg ZLIB_VER='$(ZLIB_VER)' \
+  --build-arg PCRE_VER='$(PCRE_VER)' \
+  --build-arg OPENSSL_VER='$(OPENSSL_VER)' \
+  --build-arg CMARK_VER='$(CMARK_VER)' \
+ .
+
 .PHONY: bld
 bld:
 	@echo '$(DOCKER_IMAGE)'
@@ -32,34 +61,8 @@ bld:
   --build-arg CMARK_VER='$(CMARK_VER)' \
  .
 
-.PHONY: dev
-dev:
-	@export DOCKER_BUILDKIT=1;
-	@docker buildx build -o type=docker \
-  --target=dev \
-  --tag='$(DOCKER_IMAGE):dev-$(OPENRESTY_VER)' \
-  --build-arg PREFIX='$(OPENRESTY_HOME)' \
-  --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
-  --build-arg ZLIB_VER='$(ZLIB_VER)' \
-  --build-arg PCRE_VER='$(PCRE_VER)' \
-  --build-arg OPENSSL_VER='$(OPENSSL_VER)' \
-  --build-arg CMARK_VER='$(CMARK_VER)' \
- .
 
-.PHONY: min
-min:
-	@export DOCKER_BUILDKIT=1;
-	@docker buildx build -o type=docker \
-  --target min \
-  --tag $(DOCKER_IMAGE):min-$(OPENRESTY_VER) \
-  --tag docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/$(PROXY_CONTAINER_NAME):$(PROXY_VER) \
-  --build-arg PREFIX='$(OPENRESTY_HOME)' \
-  --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
-  --build-arg ZLIB_VER='$(ZLIB_VER)' \
-  --build-arg PCRE_VER='$(PCRE_VER)' \
-  --build-arg OPENSSL_VER='$(OPENSSL_VER)' \
-  --build-arg CMARK_VER='$(CMARK_VER)' \
- .
+
 
 dkrStatus != docker ps --filter name=orMin --format 'status: {{.Status}}'
 dkrPortInUse != docker ps --format '{{.Ports}}' | grep -oP '^(.+):\K(\d{4})' | grep -oP "80"
@@ -69,15 +72,29 @@ dkrNetworkInUse != docker network list --format '{{.Name}}' | grep -oP "$(NETWOR
 run:
 	@$(if $(dkrNetworkInUse),echo  '- NETWORK [ $(NETWORK) ] is available',docker network create $(NETWORK))
 	@$(if $(dkrPortInUse), echo '- PORT [ 80 ] is already taken';false , echo  '- PORT [ 80 ] is available')
+	@docker pull docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/$(PROXY_CONTAINER_NAME):$(PROXY_VER)
 	@docker run \
- --rm \
-  --name orMin \
+  --name min \
   --publish 80:80 \
+  --network $(NETWORK) \
   --detach \
-   $(DOCKER_IMAGE):min-$(OPENRESTY_VER)
+  docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/$(PROXY_CONTAINER_NAME):$(PROXY_VER)
 	@sleep 3
 	@docker ps
-	@docker logs orMin
+	@docker logs min
+
+.PHONY: it
+it:
+	@$(if $(dkrNetworkInUse),echo  '- NETWORK [ $(NETWORK) ] is available',docker network create $(NETWORK))
+	@$(if $(dkrPortInUse), echo '- PORT [ 80 ] is already taken';false , echo  '- PORT [ 80 ] is available')
+	@docker pull docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/$(PROXY_CONTAINER_NAME):$(PROXY_VER)
+	@docker run \
+  --rm -it\
+  --entrypoint 'sh' \
+  docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/$(PROXY_CONTAINER_NAME):$(PROXY_VER)
+	@sleep 3
+	@docker ps
+	@docker logs min
 
 .PHONY: stop
 stop:
