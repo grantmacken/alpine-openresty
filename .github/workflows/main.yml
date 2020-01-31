@@ -20,7 +20,7 @@ jobs:
         with:
           version: latest
       - name: make images
-        run: make bld
+        run: make
       - name: check images
         run: |
           docker images | grep 'grantmacken'
