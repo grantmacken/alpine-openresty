@@ -1,7 +1,5 @@
 # [alpine-openresty](https://github.com/grantmacken/alpine-openresty)
 
-
-
 [![](https://github.com/grantmacken/alpine-xqerl/workflows/CI/badge.svg)](https://github.com/grantmacken/alpine-openresty/actions)
 
 This repo provides a base image from which I create my *development* and *production* images
@@ -16,15 +14,35 @@ As well as building openresty, the image contains some stuff I find useful
 <!--  - Nginx::Test the openresty data driven test framework. -->
  - a [commonmark](https://github.com/commonmark/CommonMark) implementaion: [cmark](https://github.com/commonmark/cmark)
 
-
 Available on [dockerhub](https://hub.docker.com/r/grantmacken/alpine-openresty)
 
 [![dockeri.co](https://dockeri.co/image/grantmacken/alpine-openresty)](https://hub.docker.com/r/grantmacken/alpine-openresty)
 
-Note: The provided docker versions of openresty are compiled with the sse_4.2 instruction set.
-If you pull and try to run on an older computer computer openresty will fail to run.
+Note: The provided docker versions of openresty compile luajit with the [SSE_4.2 instruction set](https://en.wikipedia.org/wiki/SSE4)
 
 ```
 grep flags  /proc/cpuinfo | grep -o sse4_2
 ```
+
+ - [Github Actions](https://github.com/grantmacken/alpine-openresty/actions) compiles and runs OK! 
+ - My [Google Compute Engine](https://cloud.google.com/compute) which uses [Container-Optimized OS](https://cloud.google.com/container-optimized-os) also runs the openresty container OK!
+
+ However if you pull and try to run on an older computer openresty without the [SSE_4.2 instruction set](https://en.wikipedia.org/wiki/SSE4) which is the case in my local dev machine which has AMD's Barcelona CPU.  So to run the openresty container locally, I have build the image locally and get the compiler using AMD's Barcelona *SSE4a* instruction set, when it compiles luajit. 
+
+When I run make, if *GITHUB_ACTION* is not defined, I set `LUAJIT_OPT :='-msse4a'` to pass as a docker ARG.
+
+```
+ifndef GITHUB_ACTION
+LUAJIT_OPT :='-msse4a'
+endif
+```
+
+If you have your computer CPU has [SEE4.2](https://en.wikipedia.org/wiki/SSE4) 
+and you want to run `make` locally, just erase the above 3 lines from the Makefile 
+
+
+
+
+
+
 

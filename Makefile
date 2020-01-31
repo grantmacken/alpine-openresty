@@ -8,14 +8,16 @@ include .env
 # https://www.pcre.org/  - always uses 8.3
 # https://www.zlib.net/
 # https://github.com/commonmark/cmark/releases
-
+# https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables
+ifndef GITHUB_ACTION
+LUAJIT_OPT :='-msse4a'
+endif
 LAST_ALPINE_VER != grep -oP '^FROM alpine:\K[\d\.]+' Dockerfile | head -1
 
 .PHONY: build
 build: dev
 	@export DOCKER_BUILDKIT=1;
 	@docker buildx build -o type=docker \
-  --target min \
   --tag $(DOCKER_IMAGE):min-$(OPENRESTY_VER) \
   --tag docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/$(PROXY_CONTAINER_NAME):$(PROXY_VER) \
   --build-arg PREFIX='$(OPENRESTY_HOME)' \
@@ -24,24 +26,12 @@ build: dev
   --build-arg PCRE_VER='$(PCRE_VER)' \
   --build-arg OPENSSL_VER='$(OPENSSL_VER)' \
   --build-arg CMARK_VER='$(CMARK_VER)' \
+  --build-arg LUAJIT_OPT="$(LUAJIT_OPT)" \
  .
 
 .PHONY: dev
-dev: bld
+dev:
 	@export DOCKER_BUILDKIT=1;
-	@docker buildx build -o type=docker \
-  --target=dev \
-  --tag='$(DOCKER_IMAGE):dev-$(OPENRESTY_VER)' \
-  --build-arg PREFIX='$(OPENRESTY_HOME)' \
-  --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
-  --build-arg ZLIB_VER='$(ZLIB_VER)' \
-  --build-arg PCRE_VER='$(PCRE_VER)' \
-  --build-arg OPENSSL_VER='$(OPENSSL_VER)' \
-  --build-arg CMARK_VER='$(CMARK_VER)' \
- .
-
-.PHONY: bld
-bld:
 	@echo '$(DOCKER_IMAGE)'
 	@export DOCKER_BUILDKIT=1;
 	@echo 'LAST ALPINE VERSION: $(LAST_ALPINE_VER) '
@@ -51,15 +41,38 @@ bld:
  sed -i 's/alpine:$(LAST_ALPINE_VER)/alpine:$(FROM_ALPINE_TAG)/g' Dockerfile && \
  docker pull alpine:$(FROM_ALPINE_TAG) ; fi
 	@docker buildx build -o type=docker \
-  --target=bld \
-  --tag='$(DOCKER_IMAGE):bld' \
+  --target=dev \
+  --tag='$(DOCKER_IMAGE):dev-$(OPENRESTY_VER)' \
   --build-arg PREFIX='$(OPENRESTY_HOME)' \
   --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
   --build-arg ZLIB_VER='$(ZLIB_VER)' \
   --build-arg PCRE_VER='$(PCRE_VER)' \
   --build-arg OPENSSL_VER='$(OPENSSL_VER)' \
   --build-arg CMARK_VER='$(CMARK_VER)' \
+  --build-arg LUAJIT_OPT="$(LUAJIT_OPT)" \
  .
+
+# .PHONY: bld
+# bld:
+# 	@echo '$(DOCKER_IMAGE)'
+# 	@export DOCKER_BUILDKIT=1;
+# 	@echo 'LAST ALPINE VERSION: $(LAST_ALPINE_VER) '
+# 	@if [[ '$(LAST_ALPINE_VER)' = '$(FROM_ALPINE_TAG)' ]] ; then \
+#  echo 'FROM_ALPINE_TAG: $(FROM_ALPINE_TAG) ' ; else \
+#  echo ' - updating Dockerfile to Alpine tag: $(FROM_ALPINE_TAG) ' && \
+#  sed -i 's/alpine:$(LAST_ALPINE_VER)/alpine:$(FROM_ALPINE_TAG)/g' Dockerfile && \
+#  docker pull alpine:$(FROM_ALPINE_TAG) ; fi
+# 	@docker buildx build -o type=docker \
+#   --target=bld \
+#   --tag='$(DOCKER_IMAGE):bld' \
+#   --build-arg PREFIX='$(OPENRESTY_HOME)' \
+#   --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
+#   --build-arg ZLIB_VER='$(ZLIB_VER)' \
+#   --build-arg PCRE_VER='$(PCRE_VER)' \
+#   --build-arg OPENSSL_VER='$(OPENSSL_VER)' \
+#   --build-arg CMARK_VER='$(CMARK_VER)' \
+#   --build-arg LUAJIT_OPT="$(LUAJIT_OPT)" \
+#  .
 
 
 
@@ -72,7 +85,6 @@ dkrNetworkInUse != docker network list --format '{{.Name}}' | grep -oP "$(NETWOR
 run:
 	@$(if $(dkrNetworkInUse),echo  '- NETWORK [ $(NETWORK) ] is available',docker network create $(NETWORK))
 	@$(if $(dkrPortInUse), echo '- PORT [ 80 ] is already taken';false , echo  '- PORT [ 80 ] is available')
-	@docker pull docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/$(PROXY_CONTAINER_NAME):$(PROXY_VER)
 	@docker run \
   --name min \
   --publish 80:80 \
@@ -83,22 +95,11 @@ run:
 	@docker ps
 	@docker logs min
 
-.PHONY: it
-it:
-	@$(if $(dkrNetworkInUse),echo  '- NETWORK [ $(NETWORK) ] is available',docker network create $(NETWORK))
-	@$(if $(dkrPortInUse), echo '- PORT [ 80 ] is already taken';false , echo  '- PORT [ 80 ] is available')
-	@docker pull docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/$(PROXY_CONTAINER_NAME):$(PROXY_VER)
-	@docker run \
-  --rm -it\
-  --entrypoint 'sh' \
-  docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/$(PROXY_CONTAINER_NAME):$(PROXY_VER)
-	@sleep 3
-	@docker ps
-	@docker logs min
+
 
 .PHONY: stop
 stop:
-	@docker stop orMin
+	@docker stop min
 
 
 

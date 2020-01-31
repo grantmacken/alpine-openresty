@@ -12,6 +12,7 @@ ARG PCRE_VER
 ARG ZLIB_VER
 ARG OPENSSL_VER
 ARG CMARK_VER
+ARG LUAJIT_OPT
 ARG PCRE_PREFIX="${PREFIX}/pcre"
 ARG PCRE_LIB="${PCRE_PREFIX}/lib"
 ARG PCRE_INC="${PCRE_PREFIX}/include"
@@ -22,9 +23,7 @@ ARG OPENSSL_PREFIX="${PREFIX}/openssl"
 ARG OPENSSL_LIB="$OPENSSL_PREFIX/lib"
 ARG OPENSSL_INC="$OPENSSL_PREFIX/include"
 ARG CMARK_PREFIX="${PREFIX}/cmark"
-
 # https://github.com/openresty/docker-openresty/blob/master/alpine/Dockerfile
-# ARG RESTY_LUAJIT_OPTIONS="--with-luajit-xcflags='-DLUAJIT_NUMMODE=2 -DLUAJIT_ENABLE_LUA52COMPAT'"
 
 RUN --mount=type=cache,target=/var/cache/apk \ 
     ln -vs /var/cache/apk /etc/apk/cache \
@@ -61,7 +60,7 @@ RUN echo ' - install zlib' \
 WORKDIR = /home
 ADD https://ftp.pcre.org/pub/pcre/pcre-${PCRE_VER}.tar.gz ./pcre.tar.gz
 RUN echo ' - install pcre' \
-    &&  tar -C /tmp -xf ./pcre.tar.gz \
+    &&  tar -C /tmp     -xf ./pcre.tar.gz \
     && cd /tmp/pcre-${PCRE_VER} \
     && ./configure \
     --disable-cpp \
@@ -120,6 +119,7 @@ RUN echo    ' - install openresty' \
     && cd /tmp/openresty \
     && ./configure \
     --prefix=${PREFIX} \
+    --with-luajit-xcflags="-DLUAJIT_NUMMODE=2 -DLUAJIT_ENABLE_LUA52COMPAT ${LUAJIT_OPT}" \
     --with-cc-opt="-DNGX_LUA_ABORT_AT_PANIC -I${OPENSSL_INC} -I${PCRE_INC} -I${ZLIB_INC}" \
     --with-ld-opt="-L${PCRE_LIB} -L${OPENSSL_LIB} -L${ZLIB_LIB} -Wl,-rpath,${PCRE_LIB}:${OPENSSL_LIB}:${ZLIB_LIB}" \
     --with-pcre \
