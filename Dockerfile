@@ -25,7 +25,7 @@ ARG OPENSSL_INC="$OPENSSL_PREFIX/include"
 ARG CMARK_PREFIX="${PREFIX}/cmark"
 # https://github.com/openresty/docker-openresty/blob/master/alpine/Dockerfile
 
-RUN --mount=type=cache,target=/var/cache/apk \ 
+RUN --mount=type=cache,target=/var/cache/apk \
     ln -vs /var/cache/apk /etc/apk/cache \
     && apk add --virtual .build-deps \
         build-base \
@@ -55,7 +55,7 @@ RUN echo ' - install zlib' \
     && cd /home \
     && rm -f ./zlib.tar.gz \
     && rm -r /tmp/zlib-${ZLIB_VER} \
-    && echo '---------------------------' 
+    && echo '---------------------------'
 
 WORKDIR = /home
 ADD https://ftp.pcre.org/pub/pcre/pcre-${PCRE_VER}.tar.gz ./pcre.tar.gz
@@ -79,7 +79,7 @@ RUN echo ' - install pcre' \
     && cd /home \
     && rm -f ./pcre.tar.gz \
     && rm -r /tmp/pcre-${PCRE_VER} \
-    && echo '---------------------------' 
+    && echo '---------------------------'
 
 # https://github.com/openresty/openresty-packaging/blob/master/deb/openresty-openssl/debian/rules
 
@@ -108,7 +108,7 @@ RUN echo ' - install openssl' \
     && cd /home \
     && rm -f ./openssl.tar.gz \
     && rm -r /tmp/openssl-${OPENSSL_VER} \
-    && echo '---------------------------' 
+    && echo '---------------------------'
 
 WORKDIR = /home
 ADD https://openresty.org/download/openresty-${OPENRESTY_VER}.tar.gz ./openresty.tar.gz
@@ -157,7 +157,7 @@ RUN echo    ' - install openresty' \
     && cd /home \
     && rm -f ./openresty.tar.gz \
     && rm -r /tmp/openresty \
-    && echo '---------------------------'  
+    && echo '---------------------------'
 
 
 WORKDIR = /home
@@ -177,16 +177,16 @@ RUN echo    ' - install cmark' \
     && echo '   --------' \
     && echo ' -  remove apk install deps' \
     && apk del .build-deps \
-    && echo '---------------------------'  
+    && echo '---------------------------'
 
 
-# dev stage uses perl - curl uses by OPM 
+# dev stage uses perl - curl uses by OPM
 # we don't need the on production
 
 FROM alpine:3.11 as dev
 
 COPY --from=bld /usr/local /usr/local
-RUN --mount=type=cache,target=/var/cache/apk \ 
+RUN --mount=type=cache,target=/var/cache/apk \
     ln -s /var/cache/apk /etc/apk/cache \
     && apk add \
         gd \
@@ -196,12 +196,12 @@ RUN --mount=type=cache,target=/var/cache/apk \
         perl \
         curl \
     && echo ' - create special directories' \
-    && mkdir -p /etc/letsencrypt \ 
+    && mkdir -p /etc/letsencrypt \
     && mkdir -p /usr/local/openresty/nginx/html/.well-known/acme-challenge \
     && mkdir -p /usr/local/openresty/site/bin \
     && ln -s /usr/local/openresty/bin/* /usr/local/bin/ \
     && opm get ledgetech/lua-resty-http \
-    && opm get SkyLothar/lua-resty-jwt \
+    && opm get cdbattags/lua-resty-jwt \
     && opm get bungle/lua-resty-reqargs
 
 ENV OPENRESTY_HOME /usr/local/openresty
@@ -213,7 +213,7 @@ ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]
 
 FROM alpine:3.11 as min
 COPY --from=dev /usr/local/openresty /usr/local/openresty
-RUN --mount=type=cache,target=/var/cache/apk \ 
+RUN --mount=type=cache,target=/var/cache/apk \
     ln -vs /var/cache/apk /etc/apk/cache \
     && apk add --update libgcc gd geoip libxslt \
     && ln -s /usr/local/openresty/bin/* /usr/local/bin/ \

@@ -8,9 +8,9 @@ It has some minor adjustments to [official openresty alpine image](https://githu
 
 As well as building openresty, the image contains some stuff I find useful 
  - additional packages I use via OPM the openresty package manager 
-    1. ledgetech/lua-resty-http
-    2. SkyLothar/lua-resty-jwt
-    3. bungle/lua-resty-reqargs
+    1. [ledgetech/lua-resty-http](https://github.com/ledgetech/lua-resty-http)
+    2. [cdbattags/lua-resty-jwt](https://github.com/cdbattags/lua-resty-jwt)
+    3. [bungle/lua-resty-reqargs](https://github.com/bungle/lua-resty-reqargs)
 <!--  - Nginx::Test the openresty data driven test framework. -->
  - a [commonmark](https://github.com/commonmark/CommonMark) implementaion: [cmark](https://github.com/commonmark/cmark)
 

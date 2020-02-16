@@ -100,7 +100,3 @@ run:
 .PHONY: stop
 stop:
 	@docker stop min
-
-
-
-
