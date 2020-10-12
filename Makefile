@@ -70,8 +70,8 @@ run:
   docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/$(PROXY_CONTAINER_NAME):$(PROXY_VER)
 	@sleep 3
 	@docker ps
-	@docker logs min
+	@docker logs $(PROXY_CONTAINER_NAME)
 
 .PHONY: stop
 stop:
-	@docker stop min
+	@docker stop $(PROXY_CONTAINER_NAME)
