@@ -26,7 +26,6 @@ build: dev
 dev: bld
 	@docker buildx build -o type=docker \
   --target=dev \
-  --tag='$(DOCKER_IMAGE):dev-$(OPENRESTY_VER)' \
   --build-arg PREFIX='$(OPENRESTY_HOME)' \
   --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
   --build-arg ZLIB_VER='$(ZLIB_VER)' \
@@ -47,7 +46,6 @@ bld:
  docker pull alpine:$(FROM_ALPINE_TAG) ; fi
 	@docker buildx build -o type=docker \
   --target=bld \
-  --tag='$(DOCKER_IMAGE):bld-$(OPENRESTY_VER)' \
   --build-arg PREFIX='$(OPENRESTY_HOME)' \
   --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
   --build-arg ZLIB_VER='$(ZLIB_VER)' \
