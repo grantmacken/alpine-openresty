@@ -40,9 +40,38 @@ endif
 If you have your computer CPU has [SEE4.2](https://en.wikipedia.org/wiki/SSE4) 
 and you want to run `make` locally, just erase the above 3 lines from the Makefile 
 
+<!--
+# DOCKER_PKG_GITHUB=docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/min:$(OPENRESTY_VER)
+# Release links
+# https://github.com/openresty/docker-openresty/blob/master/alpine/Dockerfile
+# https://github.com/openssl/openssl/releases
+# https://www.pcre.org/  - always uses 8.3
+# https://www.zlib.net/
+# https://github.com/commonmark/cmark/releases
+# https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables
+
+ build-base \
+       gd-dev \
+       geoip-dev \
+       libmaxminddb-dev \
+       libxml2-dev \
+       libxslt-dev \
+       linux-headers \
+       luajit-dev \
+       openssl-dev \
+       paxmark \
+        pcre-dev \
+       perl-dev \
+       pkgconf \
+       zlib-dev \
+       gd \
+       perl \
+       perl-fcgi \
+       perl-io-socket-ssl \
+       perl-net-ssleay \
+       perl-protocol-websocket \
 
 
-
-
+-->
 
 

@@ -14,11 +14,6 @@ jobs:
       - name: Check compile flag
         run: |
           grep flags  /proc/cpuinfo | grep -o sse4_2
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: crazy-max/ghaction-docker-buildx@v1
-        with:
-          version: latest
       - name: make images
         run: make
       - name: check images
