@@ -8,12 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
         with:
           fetch-depth: 1
-      - name: Check compile flag
-        run: |
-          grep flags  /proc/cpuinfo | grep -o sse4_2
       - name: make images
         run: make
       - name: check images
@@ -25,7 +22,6 @@ jobs:
         run: |
           source .env
           echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin 
-          docker push ${DOCKER_IMAGE}:dev-${OPENRESTY_VER}
           docker push ${DOCKER_IMAGE}:min-${OPENRESTY_VER}
           echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
           docker push docker.pkg.github.com/${REPO_OWNER}/${REPO_NAME}/${PROXY_CONTAINER_NAME}:${PROXY_VER}
