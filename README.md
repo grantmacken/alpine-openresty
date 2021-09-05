@@ -12,7 +12,7 @@ As well as building openresty, the image contains some stuff I find useful
     2. [cdbattags/lua-resty-jwt](https://github.com/cdbattags/lua-resty-jwt)
     3. [bungle/lua-resty-reqargs](https://github.com/bungle/lua-resty-reqargs)
     4. [bungle/lua-resty-session](https://github.com/bungle/lua-resty-session)
-    5. [zmartzone/lua-resty-openid](https://github.com/zmartzone/lua-resty-openid)
+    5. [zmartzone/lua-resty-openidc](https://github.com/zmartzone/lua-resty-openidc)
 
 <!--  - Nginx::Test the openresty data driven test framework. -->
  - a [commonmark](https://github.com/commonmark/CommonMark) implementaion: [cmark](https://github.com/commonmark/cmark)
