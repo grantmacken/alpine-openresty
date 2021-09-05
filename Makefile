@@ -12,7 +12,7 @@ PROXY_IMAGE=docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/$(PROXY_CONTAINER_N
 build: dev
 	@docker buildx build -o type=docker \
   --tag $(REPO_OWNER)/$(REPO_NAME):$(OPENRESTY_VER) \
-  --tag docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/$(PROXY_CONTAINER_NAME):$(PROXY_VER) \
+	--tag $(GHPKG_REGISTRY)/$(REPO_OWNER)/$(REPO_NAME):$(GHPKG_VER) \
   --build-arg PREFIX='$(OPENRESTY_HOME)' \
   --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
   --build-arg ZLIB_VER='$(ZLIB_VER)' \

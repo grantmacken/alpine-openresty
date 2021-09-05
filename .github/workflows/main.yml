@@ -16,6 +16,17 @@ jobs:
       - name: check images
         run: |
           docker images | grep 'grantmacken'
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push to GitHub Container Registry
+        run: |
+          source .env
+          echo "${GHPKG_REGISTRY}/${REPO_OWNER}/${REPO_NAME}:${GHPKG_VER}"
+          docker push ${GHPKG_REGISTRY}/${REPO_OWNER}/${REPO_NAME}:${GHPKG_VER}
       #     make run
       #     make stop
       # - name: Push to Dockerhub and Github Packages
