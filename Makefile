@@ -11,7 +11,7 @@ PROXY_IMAGE=docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/$(PROXY_CONTAINER_N
 .PHONY: build
 build: dev
 	@docker buildx build -o type=docker \
-  --tag $(DOCKER_IMAGE):$(OPENRESTY_VER) \
+  --tag $(REPO_OWNER)/$(REPO_NAME):$(OPENRESTY_VER) \
   --tag docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/$(PROXY_CONTAINER_NAME):$(PROXY_VER) \
   --build-arg PREFIX='$(OPENRESTY_HOME)' \
   --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
@@ -37,13 +37,6 @@ dev: bld
 
 .PHONY: bld
 bld:
-	@echo '$(DOCKER_IMAGE)'
-	@echo 'LAST ALPINE VERSION: $(LAST_ALPINE_VER) '
-	@if [[ '$(LAST_ALPINE_VER)' = '$(FROM_ALPINE_TAG)' ]] ; then \
- echo 'FROM_ALPINE_TAG: $(FROM_ALPINE_TAG) ' ; else \
- echo ' - updating Dockerfile to Alpine tag: $(FROM_ALPINE_TAG) ' && \
- sed -i 's/alpine:$(LAST_ALPINE_VER)/alpine:$(FROM_ALPINE_TAG)/g' Dockerfile && \
- docker pull alpine:$(FROM_ALPINE_TAG) ; fi
 	@docker buildx build -o type=docker \
   --target=bld \
   --build-arg PREFIX='$(OPENRESTY_HOME)' \
@@ -54,6 +47,17 @@ bld:
   --build-arg CMARK_VER='$(CMARK_VER)' \
   --build-arg OPENSSL_PATCH_VER="$(OPENSSL_PATCH_VER)" \
  .
+
+.PHONY: alpine-version
+alpine-version:
+	@echo 'LAST ALPINE VERSION: $(LAST_ALPINE_VER)'
+	@if [[ '$(LAST_ALPINE_VER)' = '$(FROM_ALPINE_TAG)' ]]
+	then
+	echo 'FROM_ALPINE_TAG: $(FROM_ALPINE_TAG)'
+	else
+	echo ' - updating Dockerfile to Alpine tag: $(FROM_ALPINE_TAG)'
+	sed -i 's/alpine:$(LAST_ALPINE_VER)/alpine:$(FROM_ALPINE_TAG)/g' Dockerfile
+	fi
 
 dkrNetworkInUse != docker network list --format '{{.Name}}' | grep -oP "$(NETWORK)"
 

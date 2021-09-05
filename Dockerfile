@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:experimental
 # Dockerfile grantmacken/alpine-openresty
 # https://github.com/grantmacken/alpine-openresty
-FROM alpine:3.12 as bld
+FROM alpine:3.14.2 as bld
 # LABEL maintainer="${GIT_USER_NAME} <${GIT_USER_EMAIL}>"
 
 ARG PREFIX
@@ -75,8 +75,6 @@ RUN echo ' - install pcre' \
     && rm -f /home/pcre.tar.gz \
     && rm -r /tmp/pcre-${PCRE_VER} \
     && echo '---------------------------'
-
-
 
 # https://github.com/openresty/openresty-packaging/blob/master/deb/openresty-openssl/debian/rules
 ADD https://www.openssl.org/source/openssl-${OPENSSL_VER}.tar.gz ./openssl.tar.gz
@@ -176,7 +174,7 @@ RUN echo ' -  FINISH ' \
     && apk del .build-deps \
     && echo '---------------------------'
 
-FROM alpine:3.11 as dev
+FROM alpine:3.14.2 as dev
 
 COPY --from=bld /usr/local /usr/local
 RUN --mount=type=cache,target=/var/cache/apk \
@@ -207,7 +205,7 @@ EXPOSE 80 443
 STOPSIGNAL SIGTERM
 ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]
 
-FROM alpine:3.12 as min
+FROM alpine:3.14.2 as min
 COPY --from=dev /usr/local/openresty /usr/local/openresty
 RUN --mount=type=cache,target=/var/cache/apk \
     ln -vs /var/cache/apk /etc/apk/cache \
