@@ -203,7 +203,7 @@ ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]
 
 FROM docker.io/alpine:3.14.2 as min
 COPY --from=dev /usr/local/openresty /usr/local/openresty
-RUN apk add --update libgcc gd geoip libxslt \
+RUN apk add --no-cache libgcc gd geoip libxslt \
     && mkdir -p /etc/letsencrypt \
     && ln -s /usr/local/openresty/bin/* /usr/local/bin/
 
