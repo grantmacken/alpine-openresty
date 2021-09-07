@@ -5,14 +5,14 @@ SHELL=/bin/bash
 MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 include .env
-LAST_ALPINE_VER != grep -oP '^FROM alpine:\K[\d\.]+' Dockerfile | head -1
-PROXY_IMAGE=docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/$(PROXY_CONTAINER_NAME):$(PROXY_VER)
+LAST_ALPINE_VER != grep -oP '^FROM docker.io/alpine:\K[\d\.]+' Dockerfile | head -1
+PROXY_IMAGE=$(GHPKG_REGISTRY)/$(REPO_OWNER)/$(REPO_NAME):$(GHPKG_VER)
 
 .PHONY: build
 build: dev
-	@docker buildx build -o type=docker \
-  --tag $(REPO_OWNER)/$(REPO_NAME):$(OPENRESTY_VER) \
-	--tag $(GHPKG_REGISTRY)/$(REPO_OWNER)/$(REPO_NAME):$(GHPKG_VER) \
+	@podman build \
+  --tag docker.io/$(REPO_OWNER)/$(REPO_NAME):$(OPENRESTY_VER) \
+	--tag $(PROXY_IMAGE) \
   --build-arg PREFIX='$(OPENRESTY_HOME)' \
   --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
   --build-arg ZLIB_VER='$(ZLIB_VER)' \
@@ -24,7 +24,7 @@ build: dev
 
 .PHONY: dev
 dev: bld
-	@docker buildx build -o type=docker \
+	@podman build \
   --target=dev \
   --build-arg PREFIX='$(OPENRESTY_HOME)' \
   --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
@@ -37,7 +37,7 @@ dev: bld
 
 .PHONY: bld
 bld:
-	@docker buildx build -o type=docker \
+	@podman build \
   --target=bld \
   --build-arg PREFIX='$(OPENRESTY_HOME)' \
   --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
@@ -59,21 +59,21 @@ alpine-version:
 	sed -i 's/alpine:$(LAST_ALPINE_VER)/alpine:$(FROM_ALPINE_TAG)/g' Dockerfile
 	fi
 
-dkrNetworkInUse != docker network list --format '{{.Name}}' | grep -oP "$(NETWORK)"
+# dkrNetworkInUse = podman network list --format '{{.Name}}' | grep -oP "$(NETWORK)"
 
-.PHONY: run
-run:
-	@$(if $(dkrNetworkInUse),echo  '- NETWORK [ $(NETWORK) ] is available',docker network create $(NETWORK))
-	@docker run \
-  --name $(PROXY_CONTAINER_NAME) \
-  --publish 80:80 \
-  --network $(NETWORK) \
-  --detach \
-  docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/$(PROXY_CONTAINER_NAME):$(PROXY_VER)
-	@sleep 3
-	@docker ps
-	@docker logs $(PROXY_CONTAINER_NAME)
+# .PHONY: run
+# run:
+# 	@$(if $(dkrNetworkInUse),echo  '- NETWORK [ $(NETWORK) ] is available',docker network create $(NETWORK))
+# 	@docker run \
+#   --name $(PROXY_CONTAINER_NAME) \
+#   --publish 80:80 \
+#   --network $(NETWORK) \
+#   --detach \
+#   docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/$(PROXY_CONTAINER_NAME):$(PROXY_VER)
+# 	@sleep 3
+# 	@docker ps
+# 	@docker logs $(PROXY_CONTAINER_NAME)
 
-.PHONY: stop
-stop:
-	@docker stop $(PROXY_CONTAINER_NAME)
+# .PHONY: stop
+# stop:
+# 	@docker stop $(PROXY_CONTAINER_NAME)

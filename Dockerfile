@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:experimental
 # Dockerfile grantmacken/alpine-openresty
 # https://github.com/grantmacken/alpine-openresty
-FROM alpine:3.14.2 as bld
+FROM docker.io/alpine:3.14.2 as bld
 # LABEL maintainer="${GIT_USER_NAME} <${GIT_USER_EMAIL}>"
 
 ARG PREFIX
@@ -29,9 +29,7 @@ ARG PATCHES_URL="https://raw.githubusercontent.com/openresty/openresty/master/pa
 
 # https://github.com/openresty/docker-openresty/blob/master/alpine/Dockerfile
 
-RUN --mount=type=cache,target=/var/cache/apk \
-    ln -vs /var/cache/apk /etc/apk/cache \
-    && apk add --virtual .build-deps \
+RUN apk add --virtual .build-deps \
        build-base \
        gd-dev \
        linux-headers \
@@ -174,12 +172,10 @@ RUN echo ' -  FINISH ' \
     && apk del .build-deps \
     && echo '---------------------------'
 
-FROM alpine:3.14.2 as dev
+FROM docker.io/alpine:3.14.2 as dev
 
 COPY --from=bld /usr/local /usr/local
-RUN --mount=type=cache,target=/var/cache/apk \
-    ln -s /var/cache/apk /etc/apk/cache \
-    && apk add \
+RUN apk add \
         gd \
         geoip \
         libgcc \
@@ -205,11 +201,9 @@ EXPOSE 80 443
 STOPSIGNAL SIGTERM
 ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]
 
-FROM alpine:3.14.2 as min
+FROM docker.io/alpine:3.14.2 as min
 COPY --from=dev /usr/local/openresty /usr/local/openresty
-RUN --mount=type=cache,target=/var/cache/apk \
-    ln -vs /var/cache/apk /etc/apk/cache \
-    && apk add --update libgcc gd geoip libxslt \
+RUN apk add --update libgcc gd geoip libxslt \
     && mkdir -p /etc/letsencrypt \
     && ln -s /usr/local/openresty/bin/* /usr/local/bin/
 
