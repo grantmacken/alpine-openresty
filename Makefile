@@ -81,12 +81,11 @@ alpine-version:
  # podman run -i --rm $(RESTY_IMAGE)
 .PHONY: run-resty 
 run-resty:
-	@podman run -it --rm $(RESTY_IMAGE) -e $$(cat <<EOF
+	@podman run --interactive --rm $(RESTY_IMAGE) -e $$(cat <<EOF
 	print('$(PROXY_IMAGE)')
 	EOF
 	)
-	@
 
 .PHONY: run-opm 
 run-opm:
-	@podman run -it --rm $(RESTY_IMAGE) "print('hello')"
+	@#podman run -it --rm $(RESTY_IMAGE) "print('hello')"
