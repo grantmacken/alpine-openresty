@@ -15,7 +15,6 @@ jobs:
         run: make
       - name: check images
         run: |
-          which w3m
           podman image ls
           echo 'check: call resty'
           make run-resty
