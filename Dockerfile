@@ -150,21 +150,17 @@ RUN echo    ' - install openresty' \
     && rm -f ${PREFIX}/nginx/conf/win-utf ${PREFIX}/nginx/conf/koi-* \
     && echo '---------------------------'
 
-ADD https://github.com/commonmark/cmark/archive/${CMARK_VER}.tar.gz ./cmark.tar.gz
-RUN echo    ' - install cmark' \
-    && echo '   ---------------' \
-    && apk add --update cmake \
-    && tar -C /tmp -xf ./cmark.tar.gz \
-    && cd /tmp/cmark-${CMARK_VER} \
-    && cmake \
-    && make install \
-    && rm -f /home/cmark.tar.gz \
-    && rm -r /tmp/cmark-${CMARK_VER} \
-    && echo '---------------------------' 
-
-# && wget ${OPENSSL_PATCH} \
-# dev stage uses perl - curl uses by OPM
-# we don't need the on production
+# ADD https://github.com/commonmark/cmark/archive/${CMARK_VER}.tar.gz ./cmark.tar.gz
+# RUN echo    ' - install cmark' \
+#     && echo '   ---------------' \
+#     && apk add --update cmake \
+#     && tar -C /tmp -xf ./cmark.tar.gz \
+#     && cd /tmp/cmark-${CMARK_VER} \
+#     && cmake \
+#     && make install \
+#     && rm -f /home/cmark.tar.gz \
+#     && rm -r /tmp/cmark-${CMARK_VER} \
+#     && echo '---------------------------' 
 
 RUN echo ' -  FINISH ' \
     && echo '   --------' \
@@ -172,14 +168,15 @@ RUN echo ' -  FINISH ' \
     && apk del .build-deps \
     && echo '---------------------------'
 
-FROM docker.io/alpine:3.14.2 as dev
+##############################
+# tag and keep this image to spin up
+# - to use resty-cli
+##############################
 
+
+FROM docker.io/alpine:3.14.2 as resty
 COPY --from=bld /usr/local /usr/local
 RUN apk add \
-        gd \
-        geoip \
-        libgcc \
-        libxslt \
         perl \
         curl \
     && echo ' - create special directories' \
@@ -187,22 +184,31 @@ RUN apk add \
     && mkdir -p /usr/local/openresty/nginx/html/.well-known/acme-challenge \
     && mkdir -p /usr/local/openresty/nginx/cache \
     && mkdir -p /usr/local/openresty/site/bin \
-    && ln -s /usr/local/openresty/bin/* /usr/local/bin/ \
-    && opm get ledgetech/lua-resty-http \
-    && opm get cdbattags/lua-resty-jwt \
-    && opm get bungle/lua-resty-reqargs \
-    && opm get bungle/lua-resty-session \
-    && opm get zmartzone/lua-resty-openidc
+    && ln -s /usr/local/openresty/bin/* /usr/local/bin/ 
+    # && opm get cdbattags/lua-resty-jwt \
+    # && opm get bungle/lua-resty-reqargs \
+    # && opm get bungle/lua-resty-session \
+    # && opm get zmartzone/lua-resty-openidc
 
-ENV OPENRESTY_HOME /usr/local/openresty
 ENV LANG C.UTF-8
 WORKDIR /usr/local/openresty
-EXPOSE 80 443
 STOPSIGNAL SIGTERM
-ENTRYPOINT ["bin/openresty", "-g", "daemon off;"]
+ENTRYPOINT ["resty" , "-e"]
 
-FROM docker.io/alpine:3.14.2 as min
-COPY --from=dev /usr/local/openresty /usr/local/openresty
+##############################
+# tag and keep this image to spin up
+# - to add opm modules
+##############################
+
+FROM resty as opm
+COPY --from=resty /usr/local /usr/local
+ENV LANG C.UTF-8
+WORKDIR /usr/local/openresty
+STOPSIGNAL SIGTERM
+ENTRYPOINT ["opm"]
+
+FROM docker.io/alpine:3.14.2 as proxy
+COPY --from=resty /usr/local/openresty /usr/local/openresty
 RUN apk add --no-cache libgcc gd geoip libxslt \
     && mkdir -p /etc/letsencrypt \
     && ln -s /usr/local/openresty/bin/* /usr/local/bin/

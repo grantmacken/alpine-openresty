@@ -25,7 +25,12 @@ jobs:
         run: |
           source .env
           echo "${GHPKG_REGISTRY}/${REPO_OWNER}/${REPO_NAME}:${GHPKG_VER}"
+          echo "${GHPKG_REGISTRY}/${REPO_OWNER}/${REPO_NAME}:opm-${GHPKG_VER}"
+          echo "${GHPKG_REGISTRY}/${REPO_OWNER}/${REPO_NAME}:resty-${GHPKG_VER}"
           podman push ${GHPKG_REGISTRY}/${REPO_OWNER}/${REPO_NAME}:${GHPKG_VER}
+          podman push ${GHPKG_REGISTRY}/${REPO_OWNER}/${REPO_NAME}:resty-${GHPKG_VER}
+          podman push ${GHPKG_REGISTRY}/${REPO_OWNER}/${REPO_NAME}:opm-${GHPKG_VER}
+
       #     make run
       #     make stop
       # - name: Push to Dockerhub and Github Packages

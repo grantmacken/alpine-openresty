@@ -7,10 +7,14 @@ MAKEFLAGS += --no-builtin-rules
 include .env
 LAST_ALPINE_VER != grep -oP '^FROM docker.io/alpine:\K[\d\.]+' Dockerfile | head -1
 PROXY_IMAGE=$(GHPKG_REGISTRY)/$(REPO_OWNER)/$(REPO_NAME):$(GHPKG_VER)
+RESTY_IMAGE=$(GHPKG_REGISTRY)/$(REPO_OWNER)/$(REPO_NAME):resty-$(GHPKG_VER)
+OPM_IMAGE=$(GHPKG_REGISTRY)/$(REPO_OWNER)/$(REPO_NAME):opm-$(GHPKG_VER)
 
-.PHONY: build
-build: dev
+# default
+.PHONY: proxy
+proxy: opm ## proxy version is without resty-cli opm and associated curl lib
 	@podman build \
+  --target=proxy \
   --tag docker.io/$(REPO_OWNER)/$(REPO_NAME):$(OPENRESTY_VER) \
 	--tag $(PROXY_IMAGE) \
   --build-arg PREFIX='$(OPENRESTY_HOME)' \
@@ -18,21 +22,36 @@ build: dev
   --build-arg ZLIB_VER='$(ZLIB_VER)' \
   --build-arg PCRE_VER='$(PCRE_VER)' \
   --build-arg OPENSSL_VER='$(OPENSSL_VER)' \
-  --build-arg CMARK_VER='$(CMARK_VER)' \
   --build-arg OPENSSL_PATCH_VER="$(OPENSSL_PATCH_VER)" \
+  --build-arg CMARK_VER='$(CMARK_VER)' \
  .
 
-.PHONY: dev
-dev: bld
+.PHONY: opm
+opm: resty ## fat version with resty-cli associated curl lib
 	@podman build \
-  --target=dev \
+	--tag $(OPM_IMAGE) \
+  --target=opm \
   --build-arg PREFIX='$(OPENRESTY_HOME)' \
   --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
   --build-arg ZLIB_VER='$(ZLIB_VER)' \
   --build-arg PCRE_VER='$(PCRE_VER)' \
   --build-arg OPENSSL_VER='$(OPENSSL_VER)' \
-  --build-arg CMARK_VER='$(CMARK_VER)' \
   --build-arg OPENSSL_PATCH_VER="$(OPENSSL_PATCH_VER)" \
+  --build-arg CMARK_VER='$(CMARK_VER)' \
+ .
+
+.PHONY: resty
+resty: bld ## fat version with resty-cli associated curl lib
+	@podman build \
+	--tag $(RESTY_IMAGE) \
+  --target=resty \
+  --build-arg PREFIX='$(OPENRESTY_HOME)' \
+  --build-arg OPENRESTY_VER='$(OPENRESTY_VER)' \
+  --build-arg ZLIB_VER='$(ZLIB_VER)' \
+  --build-arg PCRE_VER='$(PCRE_VER)' \
+  --build-arg OPENSSL_VER='$(OPENSSL_VER)' \
+  --build-arg OPENSSL_PATCH_VER="$(OPENSSL_PATCH_VER)" \
+  --build-arg CMARK_VER='$(CMARK_VER)' \
  .
 
 .PHONY: bld
@@ -59,21 +78,15 @@ alpine-version:
 	sed -i 's/alpine:$(LAST_ALPINE_VER)/alpine:$(FROM_ALPINE_TAG)/g' Dockerfile
 	fi
 
-# dkrNetworkInUse = podman network list --format '{{.Name}}' | grep -oP "$(NETWORK)"
+ # podman run -i --rm $(RESTY_IMAGE)
+.PHONY: run-resty 
+run-resty:
+	@podman run -it --rm $(RESTY_IMAGE) -e $$(cat <<EOF
+	print('$(PROXY_IMAGE)')
+	EOF
+	)
+	@
 
-# .PHONY: run
-# run:
-# 	@$(if $(dkrNetworkInUse),echo  '- NETWORK [ $(NETWORK) ] is available',docker network create $(NETWORK))
-# 	@docker run \
-#   --name $(PROXY_CONTAINER_NAME) \
-#   --publish 80:80 \
-#   --network $(NETWORK) \
-#   --detach \
-#   docker.pkg.github.com/$(REPO_OWNER)/$(REPO_NAME)/$(PROXY_CONTAINER_NAME):$(PROXY_VER)
-# 	@sleep 3
-# 	@docker ps
-# 	@docker logs $(PROXY_CONTAINER_NAME)
-
-# .PHONY: stop
-# stop:
-# 	@docker stop $(PROXY_CONTAINER_NAME)
+.PHONY: run-opm 
+run-opm:
+	@podman run -it --rm $(RESTY_IMAGE) "print('hello')"
