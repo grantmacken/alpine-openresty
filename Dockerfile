@@ -193,7 +193,7 @@ RUN apk add \
 ENV LANG C.UTF-8
 WORKDIR /usr/local/openresty
 STOPSIGNAL SIGTERM
-ENTRYPOINT ["resty" , "-e"]
+ENTRYPOINT ["resty" ]
 
 ##############################
 # tag and keep this image to spin up
@@ -201,7 +201,6 @@ ENTRYPOINT ["resty" , "-e"]
 ##############################
 
 FROM resty as opm
-COPY --from=resty /usr/local /usr/local
 ENV LANG C.UTF-8
 WORKDIR /usr/local/openresty
 STOPSIGNAL SIGTERM
