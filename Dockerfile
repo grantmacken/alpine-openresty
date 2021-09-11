@@ -183,10 +183,10 @@ RUN apk add --no-cache perl curl libgcc gd geoip libxslt \
     && mkdir -p /usr/local/openresty/nginx/cache \
     && mkdir -p /usr/local/openresty/site/bin \
     && ln -s /usr/local/openresty/bin/* /usr/local/bin/ 
-    # && opm get cdbattags/lua-resty-jwt \
-    # && opm get bungle/lua-resty-reqargs \
-    # && opm get bungle/lua-resty-session \
-    # && opm get zmartzone/lua-resty-openidc
+# && opm get cdbattags/lua-resty-jwt \
+# && opm get bungle/lua-resty-reqargs \
+# && opm get bungle/lua-resty-session \
+# && opm get zmartzone/lua-resty-openidc
 
 ENV LANG C.UTF-8
 WORKDIR /usr/local/openresty

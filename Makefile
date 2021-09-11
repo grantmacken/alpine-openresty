@@ -82,10 +82,6 @@ alpine-version:
 .PHONY: run-resty 
 run-resty:
 	@podman run --interactive --rm $(RESTY_IMAGE) --help
-	@podman run --interactive --rm $(RESTY_IMAGE) -e $$(cat <<EOF
-	print('$(PROXY_IMAGE)')
-	EOF
-	)
 
 .PHONY: run-opm 
 run-opm:
