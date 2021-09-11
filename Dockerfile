@@ -176,7 +176,7 @@ RUN echo ' -  FINISH ' \
 
 FROM docker.io/alpine:3.14.2 as resty
 COPY --from=bld /usr/local /usr/local
-RUN apk add --no-cache perl curl libgcc gd geoip libxslt
+RUN apk add --no-cache perl curl libgcc gd geoip libxslt \
     && echo ' - create special directories' \
     && mkdir -p /etc/letsencrypt \
     && mkdir -p /usr/local/openresty/nginx/html/.well-known/acme-challenge \
